@@ -50,7 +50,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user.setEmail(email);
             user.setFullName(name);
             user.setProfileImageUrl(picture);
-            user.setRole(Role.USER);
+            // First user becomes ADMIN, others USER
+            user.setRole(userRepository.count() == 0 ? Role.ADMIN : Role.USER);
             user.setEmailVerified(Boolean.TRUE.equals(emailVerified));
             user.setCreatedAt(LocalDateTime.now());
             user.setUpdatedAt(LocalDateTime.now());
