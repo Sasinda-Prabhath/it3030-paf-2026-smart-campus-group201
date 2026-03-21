@@ -4,12 +4,6 @@ spring:
   profiles:
     include: secrets
     
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/smartcampus}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:ASDzxc123}
-    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.postgresql.Driver}
-
   jpa:
     hibernate:
       ddl-auto: update
