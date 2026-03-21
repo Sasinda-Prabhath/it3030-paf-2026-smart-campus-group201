@@ -1,0 +1,40 @@
+# ======================
+# ROOT
+# ======================
+.env
+*.log
+
+# ======================
+# BACKEND
+# ======================
+backend/target/
+backend/.mvn/
+backend/*.class
+backend/.env
+backend/!backend/.env.example
+backend/.idea/
+backend/*.iml
+backend/.settings/
+backend/.classpath
+backend/.project
+backend/src/main/resources/application-secrets.yml
+
+# ======================
+# FRONTEND
+# ======================
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/!frontend/.env.example
+frontend/.vite/
+
+# ======================
+# OS / IDE
+# ======================
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
