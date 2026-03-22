@@ -9,33 +9,40 @@ const Navbar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
 
   return (
-    <nav className="bg-gray-800 text-white p-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-xl font-bold">Smart Campus</Link>
-        <div className="flex items-center space-x-4">
-          {user ? (
-            <>
-              <Link to="/profile" className="hover:text-gray-300">Profile</Link>
-              <div className="relative">
-                <NotificationBell onClick={() => setShowNotifications(!showNotifications)} />
-                <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
-              </div>
-              <span className="mr-4">Hello, {user.fullName}</span>
-              <button
-                onClick={logout}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+    <nav className="bg-gray-800 text-white shadow-lg">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center py-4">
+          <Link to="/" className="text-xl font-bold hover:text-gray-300 transition-colors">
+            Smart Campus
+          </Link>
+          <div className="flex items-center space-x-6">
+            {user ? (
+              <>
+                <Link to="/profile" className="hover:text-gray-300 transition-colors">Profile</Link>
+                <div className="relative">
+                  <NotificationBell onClick={() => setShowNotifications(!showNotifications)} />
+                  <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
+                </div>
+                {user.role === 'ADMIN' && (
+                  <Link to="/admin" className="hover:text-gray-300 transition-colors">Admin</Link>
+                )}
+                <span className="text-sm text-gray-300">Hello, {user.fullName}</span>
+                <button
+                  onClick={logout}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
               >
-                Logout
-              </button>
-            </>
-          ) : (
-            <Link
-              to="/login"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Login
-            </Link>
-          )}
+                Login
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </nav>
