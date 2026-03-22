@@ -5,6 +5,8 @@ import RoleGuard from '../components/RoleGuard';
 import Navbar from '../layouts/Navbar';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
+import ProfilePage from '../pages/ProfilePage';
+import NotificationsPage from '../pages/NotificationsPage';
 
 const AppRoutes = () => {
   return (
@@ -15,6 +17,8 @@ const AppRoutes = () => {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
             {/* Future admin routes */}
             <Route path="/admin" element={<RoleGuard allowedRoles={['ADMIN']}><div className="p-4">Admin Dashboard</div></RoleGuard>} />
             {/* Future staff routes can be added easily */}
