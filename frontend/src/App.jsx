@@ -1,9 +1,7 @@
+import AppRoutes from './routes/AppRoutes';
+
 function App() {
-  return (
-    <div className="App">
-      <h1>Smart Campus Management System</h1>
-    </div>
-  )
+  return <AppRoutes />;
 }
 
-export default App
+export default App;
