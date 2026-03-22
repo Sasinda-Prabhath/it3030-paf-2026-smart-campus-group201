@@ -93,6 +93,18 @@ const ProfilePage = () => {
                   <label className="block text-sm font-medium text-gray-700">Email Verified</label>
                   <p className="mt-1 text-sm text-gray-900">{profile.emailVerified ? 'Yes' : 'No'}</p>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Account Status</label>
+                  <p className="mt-1">
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                      profile.accountStatus === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                      profile.accountStatus === 'SUSPENDED' ? 'bg-red-100 text-red-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {profile.accountStatus || 'ACTIVE'}
+                    </span>
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setEditing(true)}

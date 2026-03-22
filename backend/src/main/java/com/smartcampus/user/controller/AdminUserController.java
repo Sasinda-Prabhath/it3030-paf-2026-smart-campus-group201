@@ -3,6 +3,7 @@ package com.smartcampus.user.controller;
 import com.smartcampus.user.dto.UserListDto;
 import com.smartcampus.user.dto.UpdateRoleDto;
 import com.smartcampus.user.dto.UpdateClassificationDto;
+import com.smartcampus.user.dto.UpdateStatusDto;
 import com.smartcampus.user.service.AdminUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,5 +37,17 @@ public class AdminUserController {
     public ResponseEntity<UserListDto> updateUserClassification(@PathVariable @NonNull Long id, @Valid @RequestBody UpdateClassificationDto updateDto) {
         UserListDto user = adminUserService.updateUserClassification(id, updateDto);
         return ResponseEntity.ok(user);
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<UserListDto> updateUserStatus(@PathVariable @NonNull Long id, @Valid @RequestBody UpdateStatusDto updateDto) {
+        UserListDto user = adminUserService.updateUserStatus(id, updateDto);
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable @NonNull Long id) {
+        adminUserService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -7,6 +7,8 @@ public class UserListDto {
     private String role;
     private String userType;
     private String staffType;
+    private String accountStatus;
+    private String profileImageUrl;
     private Boolean emailVerified;
     private String createdAt;
 
@@ -31,6 +33,12 @@ public class UserListDto {
 
     public String getStaffType() { return staffType; }
     public void setStaffType(String staffType) { this.staffType = staffType; }
+
+    public String getAccountStatus() { return accountStatus; }
+    public void setAccountStatus(String accountStatus) { this.accountStatus = accountStatus; }
+
+    public String getProfileImageUrl() { return profileImageUrl; }
+    public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
 
     public Boolean getEmailVerified() { return emailVerified; }
     public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }

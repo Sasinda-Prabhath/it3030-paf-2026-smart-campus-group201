@@ -9,6 +9,10 @@ import ProfilePage from '../pages/ProfilePage';
 import NotificationsPage from '../pages/NotificationsPage';
 import AdminUsersPage from '../pages/AdminUsersPage';
 import AdminDashboard from '../pages/AdminDashboard';
+import Dashboard from '../pages/Dashboard';
+import ResourcesPage from '../pages/ResourcesPage';
+import BookingsPage from '../pages/BookingsPage';
+import TicketsPage from '../pages/TicketsPage';
 
 const AppRoutes = () => {
   return (
@@ -19,12 +23,18 @@ const AppRoutes = () => {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+            
+            {/* Module placeholder routes */}
+            <Route path="/resources" element={<ProtectedRoute><ResourcesPage /></ProtectedRoute>} />
+            <Route path="/bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
+            <Route path="/tickets" element={<ProtectedRoute><TicketsPage /></ProtectedRoute>} />
+            
             {/* Admin routes */}
             <Route path="/admin" element={<RoleGuard allowedRoles={['ADMIN']}><AdminDashboard /></RoleGuard>} />
             <Route path="/admin/users" element={<RoleGuard allowedRoles={['ADMIN']}><AdminUsersPage /></RoleGuard>} />
-            {/* Future staff routes can be added easily */}
           </Routes>
         </div>
       </AuthProvider>
