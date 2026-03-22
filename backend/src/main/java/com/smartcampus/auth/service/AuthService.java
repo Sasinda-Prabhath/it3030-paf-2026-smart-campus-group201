@@ -3,6 +3,7 @@ package com.smartcampus.auth.service;
 import com.smartcampus.user.entity.User;
 import com.smartcampus.user.entity.Role;
 import com.smartcampus.user.entity.UserType;
+import com.smartcampus.user.entity.AccountStatus;
 import com.smartcampus.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -23,7 +24,8 @@ public class AuthService {
             user = new User();
             user.setEmail(email);
             user.setRole(determineInitialRole());
-            user.setUserType(UserType.STUDENT); // Default descriptive type
+            user.setUserType(classifyUserType(email));
+            user.setAccountStatus(AccountStatus.ACTIVE);
             user.setCreatedAt(LocalDateTime.now());
         }
 
@@ -37,6 +39,13 @@ public class AuthService {
 
     private Role determineInitialRole() {
         return userRepository.count() == 0 ? Role.ADMIN : Role.USER;
+    }
+
+    private UserType classifyUserType(String email) {
+        if (email != null && email.endsWith("@my.sliit.lk")) {
+            return UserType.STUDENT;
+        }
+        return UserType.STUDENT; // Default to STUDENT, admin can change later
     }
 
     public User findUserByEmail(String email) {

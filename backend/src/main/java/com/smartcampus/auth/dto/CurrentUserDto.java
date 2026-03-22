@@ -1,5 +1,7 @@
 package com.smartcampus.auth.dto;
 
+import java.time.LocalDateTime;
+
 public class CurrentUserDto {
     private Long id;
     private String email;
@@ -7,8 +9,11 @@ public class CurrentUserDto {
     private String role;
     private String userType;
     private String staffType;
+    private String accountStatus;
     private String profileImageUrl;
     private Boolean emailVerified;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     // Constructors
     public CurrentUserDto() {}
@@ -32,9 +37,18 @@ public class CurrentUserDto {
     public String getStaffType() { return staffType; }
     public void setStaffType(String staffType) { this.staffType = staffType; }
 
+    public String getAccountStatus() { return accountStatus; }
+    public void setAccountStatus(String accountStatus) { this.accountStatus = accountStatus; }
+
     public String getProfileImageUrl() { return profileImageUrl; }
     public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
 
     public Boolean getEmailVerified() { return emailVerified; }
     public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

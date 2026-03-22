@@ -27,6 +27,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private StaffType staffType;
 
+    @Enumerated(EnumType.STRING)
+    private AccountStatus accountStatus = AccountStatus.ACTIVE;
+
     private Boolean emailVerified = false;
 
     private LocalDateTime createdAt;
@@ -72,6 +75,9 @@ public class User {
         }
         this.staffType = staffType;
     }
+
+    public AccountStatus getAccountStatus() { return accountStatus; }
+    public void setAccountStatus(AccountStatus accountStatus) { this.accountStatus = accountStatus; }
 
     public Boolean getEmailVerified() { return emailVerified; }
     public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }

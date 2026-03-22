@@ -18,13 +18,17 @@ const Navbar = () => {
           <div className="flex items-center space-x-6">
             {user ? (
               <>
+                <Link to="/dashboard" className="hover:text-gray-300 transition-colors">Dashboard</Link>
                 <Link to="/profile" className="hover:text-gray-300 transition-colors">Profile</Link>
                 <div className="relative">
                   <NotificationBell onClick={() => setShowNotifications(!showNotifications)} />
                   <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
                 </div>
                 {user.role === 'ADMIN' && (
-                  <Link to="/admin" className="hover:text-gray-300 transition-colors">Admin</Link>
+                  <>
+                    <Link to="/admin" className="hover:text-gray-300 transition-colors font-medium">Admin</Link>
+                    <Link to="/admin/users" className="hover:text-gray-300 transition-colors text-sm">Users</Link>
+                  </>
                 )}
                 <span className="text-sm text-gray-300">Hello, {user.fullName}</span>
                 <button
