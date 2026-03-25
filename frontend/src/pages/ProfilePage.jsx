@@ -9,6 +9,7 @@ const ProfilePage = () => {
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({ fullName: '', profileImageUrl: '' });
   const [saving, setSaving] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -18,6 +19,7 @@ const ProfilePage = () => {
     try {
       const response = await profileApi.getProfile();
       setProfile(response.data);
+      setImageError(false);
       setFormData({
         fullName: response.data.fullName || '',
         profileImageUrl: response.data.profileImageUrl || '',
@@ -81,12 +83,15 @@ const ProfilePage = () => {
                   </div>
                   
                   <div className="flex items-center gap-6">
-                    <div className="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                      {profile.profileImageUrl ? (
+                    <div className="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center overflow-hidden">
+                      {profile.profileImageUrl && !imageError ? (
                         <img
                           src={profile.profileImageUrl}
                           alt="Profile"
                           className="w-24 h-24 rounded-full object-cover"
+                          crossOrigin="anonymous"
+                          onError={() => setImageError(true)}
+                          onLoad={() => setImageError(false)}
                         />
                       ) : (
                         <span className="text-4xl">👤</span>
@@ -201,8 +206,10 @@ const ProfilePage = () => {
                         src={formData.profileImageUrl}
                         alt="Preview"
                         className="w-20 h-20 rounded-full object-cover"
+                        crossOrigin="anonymous"
                         onError={(e) => {
                           e.target.style.display = 'none';
+                          console.warn('Failed to load image:', formData.profileImageUrl);
                         }}
                       />
                     </div>

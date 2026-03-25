@@ -53,6 +53,7 @@ public class ProfileService {
         dto.setUserType(user.getUserType() != null ? user.getUserType().name() : null);
         dto.setStaffType(user.getStaffType() != null ? user.getStaffType().name() : null);
         dto.setProfileImageUrl(user.getProfileImageUrl());
+        dto.setAccountStatus(user.getAccountStatus() != null ? user.getAccountStatus().name() : null);
         dto.setEmailVerified(user.getEmailVerified());
         dto.setCreatedAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null);
         dto.setUpdatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null);

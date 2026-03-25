@@ -7,6 +7,7 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   return (
     <nav className="bg-white border-b border-gray-200 shadow-sm">
@@ -39,8 +40,18 @@ const Navbar = () => {
                 <p className="text-sm font-medium text-gray-900">{user?.fullName}</p>
                 <p className="text-xs text-gray-500">{user?.role}</p>
               </div>
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                {user?.fullName?.charAt(0) || 'U'}
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-sm overflow-hidden">
+                {user?.profileImageUrl && !imageError ? (
+                  <img
+                    src={user.profileImageUrl}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover"
+                    crossOrigin="anonymous"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  user?.fullName?.charAt(0) || 'U'
+                )}
               </div>
             </button>
 
