@@ -40,7 +40,6 @@ public class AuthController {
         dto.setFullName(user.getFullName());
         dto.setRole(user.getRole().name());
         dto.setUserType(user.getUserType() != null ? user.getUserType().name() : null);
-        dto.setStaffType(user.getStaffType() != null ? user.getStaffType().name() : null);
         dto.setAccountStatus(user.getAccountStatus() != null ? user.getAccountStatus().name() : null);
         dto.setProfileImageUrl(user.getProfileImageUrl());
         dto.setEmailVerified(user.getEmailVerified());

@@ -17,18 +17,27 @@ const Sidebar = () => {
       { path: '/notifications', label: 'Notifications', icon: '🔔' },
     ];
 
-    const moduleItems = [
-      { path: '/resources', label: 'Resources', icon: '📦' },
-      { path: '/bookings', label: 'Bookings', icon: '📅' },
-      { path: '/tickets', label: 'Tickets', icon: '🎫' },
-    ];
+    let roleItems = [];
+
+    if (user?.role === 'TECHNICIAN') {
+      roleItems = [
+        { divider: true },
+        { path: '/technician/dashboard', label: 'Technical Dashboard', icon: '🔧' },
+      ];
+    } else if (user?.role === 'MANAGER') {
+      roleItems = [
+        { divider: true },
+        { path: '/manager/dashboard', label: 'Manager Dashboard', icon: '📋' },
+      ];
+    }
 
     const adminItems = user?.role === 'ADMIN' ? [
+      { divider: true },
       { path: '/admin', label: 'Admin Dashboard', icon: '⚙️' },
       { path: '/admin/users', label: 'User Management', icon: '👥' },
     ] : [];
 
-    return [...commonItems, { divider: true }, ...moduleItems, ...(adminItems.length > 0 ? [{ divider: true }, ...adminItems] : [])];
+    return [...commonItems, ...roleItems, ...(adminItems.length > 0 ? adminItems : [])];
   };
 
   return (

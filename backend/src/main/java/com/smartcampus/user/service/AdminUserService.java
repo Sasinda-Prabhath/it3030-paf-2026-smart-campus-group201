@@ -36,10 +36,6 @@ public class AdminUserService {
             .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setRole(updateDto.getRole());
-        // Clear staffType if role is not STAFF
-        if (updateDto.getRole() != Role.STAFF) {
-            user.setStaffType(null);
-        }
         user.setUpdatedAt(LocalDateTime.now());
 
         user = userRepository.save(user);
@@ -51,12 +47,6 @@ public class AdminUserService {
             .orElseThrow(() -> new RuntimeException("User not found"));
 
         user.setUserType(updateDto.getUserType());
-        // Only set staffType if role is STAFF
-        if (user.getRole() == Role.STAFF) {
-            user.setStaffType(updateDto.getStaffType());
-        } else {
-            user.setStaffType(null);
-        }
         user.setUpdatedAt(LocalDateTime.now());
 
         user = userRepository.save(user);
@@ -87,7 +77,6 @@ public class AdminUserService {
         dto.setFullName(user.getFullName());
         dto.setRole(user.getRole().name());
         dto.setUserType(user.getUserType() != null ? user.getUserType().name() : null);
-        dto.setStaffType(user.getStaffType() != null ? user.getStaffType().name() : null);
         dto.setAccountStatus(user.getAccountStatus() != null ? user.getAccountStatus().name() : null);
         dto.setProfileImageUrl(user.getProfileImageUrl());
         dto.setEmailVerified(user.getEmailVerified());

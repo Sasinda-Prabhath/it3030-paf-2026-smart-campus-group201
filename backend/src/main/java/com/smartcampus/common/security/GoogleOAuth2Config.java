@@ -22,9 +22,11 @@ public class GoogleOAuth2Config {
                 clientRegistrationRepository, "/oauth2/authorization");
 
         resolver.setAuthorizationRequestCustomizer(customizer -> {
-            // Add custom parameters if needed
+            // Add custom parameters for Google OAuth2
             Map<String, Object> additionalParameters = new HashMap<>();
             additionalParameters.put("access_type", "offline");
+            // Removed hd=my.sliit.lk restriction to allow all Google accounts to sign up
+            // Users will still be classified by email domain (STUDENT, LECTURER) in AuthService
             customizer.additionalParameters(additionalParameters);
         });
 
