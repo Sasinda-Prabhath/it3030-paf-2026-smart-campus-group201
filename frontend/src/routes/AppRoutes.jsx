@@ -9,10 +9,9 @@ import ProfilePage from '../pages/ProfilePage';
 import NotificationsPage from '../pages/NotificationsPage';
 import AdminUsersPage from '../pages/AdminUsersPage';
 import AdminDashboard from '../pages/AdminDashboard';
-import Dashboard from '../pages/Dashboard';
-import ResourcesPage from '../pages/ResourcesPage';
-import BookingsPage from '../pages/BookingsPage';
-import TicketsPage from '../pages/TicketsPage';
+import UserDashboard from '../pages/UserDashboard';
+import TechnicianDashboard from '../pages/TechnicianDashboard';
+import ManagerDashboard from '../pages/ManagerDashboard';
 
 const AppRoutes = () => {
   return (
@@ -27,14 +26,6 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <MainLayout><HomePage /></MainLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <MainLayout><Dashboard /></MainLayout>
               </ProtectedRoute>
             }
           />
@@ -55,29 +46,29 @@ const AppRoutes = () => {
             }
           />
           
-          {/* Module placeholder routes */}
+          {/* Role-based dashboards */}
           <Route
-            path="/resources"
+            path="/dashboard"
             element={
-              <ProtectedRoute>
-                <MainLayout><ResourcesPage /></MainLayout>
-              </ProtectedRoute>
+              <RoleGuard allowedRoles={['USER']}>
+                <MainLayout><UserDashboard /></MainLayout>
+              </RoleGuard>
             }
           />
           <Route
-            path="/bookings"
+            path="/technician/dashboard"
             element={
-              <ProtectedRoute>
-                <MainLayout><BookingsPage /></MainLayout>
-              </ProtectedRoute>
+              <RoleGuard allowedRoles={['TECHNICIAN', 'MANAGER', 'ADMIN']}>
+                <MainLayout><TechnicianDashboard /></MainLayout>
+              </RoleGuard>
             }
           />
           <Route
-            path="/tickets"
+            path="/manager/dashboard"
             element={
-              <ProtectedRoute>
-                <MainLayout><TicketsPage /></MainLayout>
-              </ProtectedRoute>
+              <RoleGuard allowedRoles={['MANAGER', 'ADMIN']}>
+                <MainLayout><ManagerDashboard /></MainLayout>
+              </RoleGuard>
             }
           />
           

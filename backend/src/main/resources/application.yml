@@ -15,4 +15,4 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 cors:
-  allowed-origins: ${FRONTEND_URL:http://localhost:3000}
+  allowed-origins: ${FRONTEND_URL:http://localhost:5173}

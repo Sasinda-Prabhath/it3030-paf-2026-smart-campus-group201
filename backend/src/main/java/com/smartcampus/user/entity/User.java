@@ -25,9 +25,6 @@ public class User {
     private UserType userType;
 
     @Enumerated(EnumType.STRING)
-    private StaffType staffType;
-
-    @Enumerated(EnumType.STRING)
     private AccountStatus accountStatus = AccountStatus.ACTIVE;
 
     private Boolean emailVerified = false;
@@ -67,14 +64,6 @@ public class User {
 
     public UserType getUserType() { return userType; }
     public void setUserType(UserType userType) { this.userType = userType; }
-
-    public StaffType getStaffType() { return staffType; }
-    public void setStaffType(StaffType staffType) {
-        if (staffType != null && this.role != Role.STAFF) {
-            throw new IllegalArgumentException("staffType can only be set for STAFF role");
-        }
-        this.staffType = staffType;
-    }
 
     public AccountStatus getAccountStatus() { return accountStatus; }
     public void setAccountStatus(AccountStatus accountStatus) { this.accountStatus = accountStatus; }

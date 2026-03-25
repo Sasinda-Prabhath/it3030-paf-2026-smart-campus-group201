@@ -6,8 +6,8 @@ public class ProfileDto {
     private String email;
     private String role;
     private String userType;
-    private String staffType;
     private String profileImageUrl;
+    private String accountStatus;
     private Boolean emailVerified;
     private String createdAt;
     private String updatedAt;
@@ -31,11 +31,11 @@ public class ProfileDto {
     public String getUserType() { return userType; }
     public void setUserType(String userType) { this.userType = userType; }
 
-    public String getStaffType() { return staffType; }
-    public void setStaffType(String staffType) { this.staffType = staffType; }
-
     public String getProfileImageUrl() { return profileImageUrl; }
     public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
+
+    public String getAccountStatus() { return accountStatus; }
+    public void setAccountStatus(String accountStatus) { this.accountStatus = accountStatus; }
 
     public Boolean getEmailVerified() { return emailVerified; }
     public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
