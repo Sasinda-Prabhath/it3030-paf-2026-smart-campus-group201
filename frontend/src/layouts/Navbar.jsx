@@ -46,7 +46,7 @@ const Navbar = () => {
                     src={user.profileImageUrl}
                     alt="Profile"
                     className="w-8 h-8 rounded-full object-cover"
-                    crossOrigin="anonymous"
+                    referrerPolicy="no-referrer"
                     onError={() => setImageError(true)}
                   />
                 ) : (

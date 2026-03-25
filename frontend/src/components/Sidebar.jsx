@@ -11,8 +11,12 @@ const Sidebar = () => {
 
   // Navigation items based on role
   const getNavItems = () => {
-    const commonItems = [
+    // Dashboard only for USER role (students/lecturers)
+    const commonItems = user?.role === 'USER' ? [
       { path: '/dashboard', label: 'Dashboard', icon: '📊' },
+      { path: '/profile', label: 'Profile', icon: '👤' },
+      { path: '/notifications', label: 'Notifications', icon: '🔔' },
+    ] : [
       { path: '/profile', label: 'Profile', icon: '👤' },
       { path: '/notifications', label: 'Notifications', icon: '🔔' },
     ];

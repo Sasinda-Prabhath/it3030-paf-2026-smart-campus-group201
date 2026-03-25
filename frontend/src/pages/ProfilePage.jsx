@@ -89,7 +89,7 @@ const ProfilePage = () => {
                           src={profile.profileImageUrl}
                           alt="Profile"
                           className="w-24 h-24 rounded-full object-cover"
-                          crossOrigin="anonymous"
+                          referrerPolicy="no-referrer"
                           onError={() => setImageError(true)}
                           onLoad={() => setImageError(false)}
                         />
@@ -206,7 +206,7 @@ const ProfilePage = () => {
                         src={formData.profileImageUrl}
                         alt="Preview"
                         className="w-20 h-20 rounded-full object-cover"
-                        crossOrigin="anonymous"
+                        referrerPolicy="no-referrer"
                         onError={(e) => {
                           e.target.style.display = 'none';
                           console.warn('Failed to load image:', formData.profileImageUrl);

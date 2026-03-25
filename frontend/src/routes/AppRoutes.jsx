@@ -50,9 +50,9 @@ const AppRoutes = () => {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <RoleGuard allowedRoles={['USER']}>
                 <MainLayout><UserDashboard /></MainLayout>
-              </ProtectedRoute>
+              </RoleGuard>
             }
           />
           <Route

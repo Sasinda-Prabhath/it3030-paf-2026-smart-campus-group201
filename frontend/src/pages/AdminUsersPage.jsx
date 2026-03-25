@@ -62,6 +62,18 @@ const AdminUsersPage = () => {
     setEditingRoleValue('');
   };
 
+  const handleDeleteUser = async (userId, userName) => {
+    if (window.confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
+      try {
+        await adminApi.deleteUser(userId);
+        setUsers(prev => prev.filter(u => u.id !== userId));
+      } catch (error) {
+        console.error('Failed to delete user', error);
+        alert('Failed to delete user. Please try again.');
+      }
+    }
+  };
+
   // Filter users based on tab
   const filteredUsers = users
     .filter(u => {
@@ -76,10 +88,12 @@ const AdminUsersPage = () => {
       }
       return true; // Show all users
     })
-    .filter(u =>
-      u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    .filter(u => {
+      const fullName = u.fullName || '';
+      const email = u.email || '';
+      return fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             email.toLowerCase().includes(searchTerm.toLowerCase());
+    });
 
   const pendingCount = users.filter(u => u.accountStatus === 'PENDING_APPROVAL').length;
 
@@ -260,21 +274,30 @@ const AdminUsersPage = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      {user.accountStatus === 'PENDING_APPROVAL' ? (
+                      <div className="flex gap-3 items-center">
+                        {user.accountStatus === 'PENDING_APPROVAL' ? (
+                          <button
+                            onClick={() => handleReviewPending(user)}
+                            className="text-indigo-600 hover:text-indigo-900 font-semibold"
+                          >
+                            Review
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleStartEditRole(user.id, user.role)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            Edit Role
+                          </button>
+                        )}
                         <button
-                          onClick={() => handleReviewPending(user)}
-                          className="text-indigo-600 hover:text-indigo-900 font-semibold"
+                          onClick={() => handleDeleteUser(user.id, user.fullName || user.email)}
+                          className="text-red-600 hover:text-red-900 text-lg"
+                          title="Delete user"
                         >
-                          Review
+                          🗑️
                         </button>
-                      ) : (
-                        <button
-                          onClick={() => handleStartEditRole(user.id, user.role)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          Edit Role
-                        </button>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 ))}
