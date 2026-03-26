@@ -1,0 +1,5 @@
+package com.smartcampus.notification.entity;
+
+public enum NotificationType {
+    SYSTEM, PROFILE_VERIFICATION, BOOKING_APPROVED, BOOKING_REJECTED, TICKET_STATUS_CHANGED, TICKET_COMMENT_ADDED
+}
