@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = () => {
-    window.location.href = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/oauth2/authorization/google`;
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081'}/oauth2/authorization/google`;
   };
 
   return (
