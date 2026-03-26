@@ -33,8 +33,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = () => {
-    window.location.href = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/oauth2/authorization/google`;
+  const login = async () => {
+    try {
+      // Google OAuth login
+      window.location.href = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/oauth2/authorization/google`;
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('An error occurred during login');
+    }
   };
 
   return (
