@@ -1,5 +1,6 @@
 package com.smartcampus.common.security;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
@@ -9,8 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 // Skeleton for Google OAuth2 configuration
+// Only loaded if OAuth2 properties are configured
 // TODO: Implement full OAuth2 user mapping in auth module
 @Component
+@ConditionalOnProperty(
+    name = "spring.security.oauth2.client.registration.google.client-id"
+)
 public class GoogleOAuth2Config {
 
     // Placeholder for OAuth2 authorization request customization
@@ -22,11 +27,9 @@ public class GoogleOAuth2Config {
                 clientRegistrationRepository, "/oauth2/authorization");
 
         resolver.setAuthorizationRequestCustomizer(customizer -> {
-            // Add custom parameters for Google OAuth2
+            // Add custom parameters if needed
             Map<String, Object> additionalParameters = new HashMap<>();
             additionalParameters.put("access_type", "offline");
-            // Removed hd=my.sliit.lk restriction to allow all Google accounts to sign up
-            // Users will still be classified by email domain (STUDENT, LECTURER) in AuthService
             customizer.additionalParameters(additionalParameters);
         });
 

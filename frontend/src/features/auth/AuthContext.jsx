@@ -33,15 +33,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = () => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL;
-
-    if (!baseUrl) {
-      console.error('VITE_API_BASE_URL is not defined in .env');
-      return;
+  const login = async () => {
+    try {
+      // Google OAuth login
+      window.location.href = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/oauth2/authorization/google`;
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('An error occurred during login');
     }
-
-    window.location.href = `${baseUrl}/oauth2/authorization/google`;
   };
 
   return (
