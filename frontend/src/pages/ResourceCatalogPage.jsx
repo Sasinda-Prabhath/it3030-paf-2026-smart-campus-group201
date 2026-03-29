@@ -147,7 +147,7 @@ const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDel
         <span className="font-medium text-slate-800">Location:</span> {resource.location}
       </p>
       {resource.availabilityWindow && (
-        <p className="leading-snug">
+        <p className="leading-snug whitespace-nowrap">
           <span className="font-medium text-slate-800">Availability Time:</span> {formatAvailabilityWindow(resource.availabilityWindow)}
         </p>
       )}
