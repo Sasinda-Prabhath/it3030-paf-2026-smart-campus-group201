@@ -15,6 +15,8 @@ const ASSET_LOCATION_OPTIONS = [
   "Business Management Building's Stock Room",
   "Engineering Building's Stock Room",
 ];
+const TIME_HOUR_OPTIONS = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, '0'));
+const TIME_MINUTE_OPTIONS = Array.from({ length: 60 }, (_, index) => String(index).padStart(2, '0'));
 
 const emptyFilters = {
   search: '',
@@ -74,6 +76,16 @@ const parseAvailabilityWindow = (availabilityWindow) => {
   return { availabilityFrom: '08:00', availabilityTo: '18:00' };
 };
 
+const getTimeParts = (value) => {
+  const [hours = '00', minutes = '00'] = (value || '00:00').split(':');
+  return {
+    hours: TIME_HOUR_OPTIONS.includes(hours) ? hours : '00',
+    minutes: TIME_MINUTE_OPTIONS.includes(minutes) ? minutes : '00',
+  };
+};
+
+const buildTimeValue = (hours, minutes) => `${hours}:${minutes}`;
+
 const formatTimeLabel = (value) => {
   if (!value) {
     return '-';
@@ -87,9 +99,7 @@ const formatTimeLabel = (value) => {
     return value;
   }
 
-  const normalizedHours = hours % 12 || 12;
-  const meridiem = hours >= 12 ? 'PM' : 'AM';
-  return `${normalizedHours}:${String(minutes).padStart(2, '0')} ${meridiem}`;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 };
 
 const formatAvailabilityWindow = (availabilityWindow) => {
@@ -202,6 +212,8 @@ const AddResourceModal = ({
   const statusOptions = isFacility ? FACILITY_STATUSES : ASSET_STATUSES;
   const locationOptions = isFacility ? FACILITY_LOCATION_OPTIONS : ASSET_LOCATION_OPTIONS;
   const today = new Date().toISOString().split('T')[0];
+  const availabilityFromParts = getTimeParts(form.availabilityFrom);
+  const availabilityToParts = getTimeParts(form.availabilityTo);
 
   useEffect(() => {
     if (isOpen) {
@@ -340,23 +352,75 @@ const AddResourceModal = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1 text-xs text-slate-500">
                   From
-                  <input
-                    required
-                    type="time"
-                    value={form.availabilityFrom}
-                    onChange={(event) => setForm((prev) => ({ ...prev, availabilityFrom: event.target.value }))}
-                    className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                    <select
+                      required
+                      value={availabilityFromParts.hours}
+                      onChange={(event) => setForm((prev) => ({
+                        ...prev,
+                        availabilityFrom: buildTimeValue(event.target.value, availabilityFromParts.minutes),
+                      }))}
+                      className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {TIME_HOUR_OPTIONS.map((hour) => (
+                        <option key={hour} value={hour}>
+                          {hour}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-sm font-medium text-slate-500">:</span>
+                    <select
+                      required
+                      value={availabilityFromParts.minutes}
+                      onChange={(event) => setForm((prev) => ({
+                        ...prev,
+                        availabilityFrom: buildTimeValue(availabilityFromParts.hours, event.target.value),
+                      }))}
+                      className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {TIME_MINUTE_OPTIONS.map((minute) => (
+                        <option key={minute} value={minute}>
+                          {minute}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </label>
                 <label className="flex flex-col gap-1 text-xs text-slate-500">
                   To
-                  <input
-                    required
-                    type="time"
-                    value={form.availabilityTo}
-                    onChange={(event) => setForm((prev) => ({ ...prev, availabilityTo: event.target.value }))}
-                    className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                    <select
+                      required
+                      value={availabilityToParts.hours}
+                      onChange={(event) => setForm((prev) => ({
+                        ...prev,
+                        availabilityTo: buildTimeValue(event.target.value, availabilityToParts.minutes),
+                      }))}
+                      className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {TIME_HOUR_OPTIONS.map((hour) => (
+                        <option key={hour} value={hour}>
+                          {hour}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-sm font-medium text-slate-500">:</span>
+                    <select
+                      required
+                      value={availabilityToParts.minutes}
+                      onChange={(event) => setForm((prev) => ({
+                        ...prev,
+                        availabilityTo: buildTimeValue(availabilityToParts.hours, event.target.value),
+                      }))}
+                      className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {TIME_MINUTE_OPTIONS.map((minute) => (
+                        <option key={minute} value={minute}>
+                          {minute}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </label>
               </div>
             </label>
