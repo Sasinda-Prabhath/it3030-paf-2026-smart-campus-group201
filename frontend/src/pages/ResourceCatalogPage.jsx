@@ -74,6 +74,29 @@ const parseAvailabilityWindow = (availabilityWindow) => {
   return { availabilityFrom: '08:00', availabilityTo: '18:00' };
 };
 
+const formatTimeLabel = (value) => {
+  if (!value) {
+    return '-';
+  }
+
+  const [hoursText, minutesText] = value.split(':');
+  const hours = Number(hoursText);
+  const minutes = Number(minutesText);
+
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+    return value;
+  }
+
+  const normalizedHours = hours % 12 || 12;
+  const meridiem = hours >= 12 ? 'PM' : 'AM';
+  return `${normalizedHours}:${String(minutes).padStart(2, '0')} ${meridiem}`;
+};
+
+const formatAvailabilityWindow = (availabilityWindow) => {
+  const { availabilityFrom, availabilityTo } = parseAvailabilityWindow(availabilityWindow);
+  return `from ${formatTimeLabel(availabilityFrom)} to ${formatTimeLabel(availabilityTo)}`;
+};
+
 const formatDateLabel = (value) => {
   if (!value) {
     return '-';
@@ -114,7 +137,7 @@ const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDel
       </p>
       {resource.availabilityWindow && (
         <p className="leading-snug">
-          <span className="font-medium text-slate-800">Availability:</span> {resource.availabilityWindow}
+          <span className="font-medium text-slate-800">Availability:</span> {formatAvailabilityWindow(resource.availabilityWindow)}
         </p>
       )}
 
@@ -230,7 +253,7 @@ const AddResourceModal = ({
 
     const payload = {
       ...form,
-      availabilityWindow: isFacility ? `${form.availabilityFrom} - ${form.availabilityTo}` : '',
+      availabilityWindow: isFacility ? `from ${formatTimeLabel(form.availabilityFrom)} to ${formatTimeLabel(form.availabilityTo)}` : '',
       availableFromDate: shouldUseAvailableDates ? form.availableFromDate : '',
       availableToDate: shouldUseAvailableDates ? form.availableToDate : '',
       unavailableFromDate: shouldUseUnavailableDates ? form.unavailableFromDate : '',
