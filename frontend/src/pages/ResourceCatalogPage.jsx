@@ -44,7 +44,7 @@ const initialForm = {
 
 const getAccentClass = (resourceType, itemType) => {
   if (resourceType === 'ASSET') {
-    return 'bg-gradient-to-r from-slate-500 to-slate-600';
+    return 'bg-gradient-to-r from-pink-200 to-rose-300';
   }
 
   if (itemType === 'LECTURE_HALL') {
