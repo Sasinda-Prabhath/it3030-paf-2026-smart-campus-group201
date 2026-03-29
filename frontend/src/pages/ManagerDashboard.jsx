@@ -1,5 +1,6 @@
 import { useAuth } from '../features/auth/AuthContext';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const ManagerDashboard = () => {
   const { user } = useAuth();
@@ -100,8 +101,13 @@ const ManagerDashboard = () => {
             <div className="bg-white rounded-lg shadow p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">📦 Resource Management</h2>
               <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-600">
-                <p className="text-lg">Resource management feature - coming soon</p>
-                <p className="text-sm mt-2">Manage and allocate campus resources</p>
+                <p className="text-lg mb-3">Manage facilities, assets, and booking availability</p>
+                <Link
+                  to="/resources"
+                  className="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
+                >
+                  Open Resource Catalogue
+                </Link>
               </div>
             </div>
           )}
