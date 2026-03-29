@@ -19,6 +19,7 @@ dist/
 Thumbs.db
 
 # Secrets
+.env
 backend/.env
-backend/src/main/resources/application-secrets.yml
 frontend/.env
+backend/src/main/resources/application-secrets.yml
