@@ -120,13 +120,13 @@ const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDel
 
       {(resource.availableFromDate || resource.availableToDate) && (
         <p className="leading-snug">
-          <span className="font-medium text-slate-800">Available Dates:</span> {formatDateLabel(resource.availableFromDate)} to {formatDateLabel(resource.availableToDate)}
+          <span className="font-medium text-slate-800">Available Dates:</span> from {formatDateLabel(resource.availableFromDate)} to {formatDateLabel(resource.availableToDate)}
         </p>
       )}
 
       {(resource.unavailableFromDate || resource.unavailableToDate) && (
         <p className="leading-snug">
-          <span className="font-medium text-slate-800">Unavailable Dates:</span> {formatDateLabel(resource.unavailableFromDate)} to {formatDateLabel(resource.unavailableToDate)}
+          <span className="font-medium text-slate-800">Unavailable Dates:</span> from {formatDateLabel(resource.unavailableFromDate)} to {formatDateLabel(resource.unavailableToDate)}
         </p>
       )}
 
