@@ -12,6 +12,8 @@ import AdminDashboard from '../pages/AdminDashboard';
 import UserDashboard from '../pages/UserDashboard';
 import TechnicianDashboard from '../pages/TechnicianDashboard';
 import ManagerDashboard from '../pages/ManagerDashboard';
+import ResourceCatalogPage from '../pages/ResourceCatalogPage';
+import AdminBookingRequestsPage from '../pages/AdminBookingRequestsPage';
 
 const AppRoutes = () => {
   return (
@@ -43,6 +45,14 @@ const AppRoutes = () => {
               <ProtectedRoute>
                 <MainLayout><NotificationsPage /></MainLayout>
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resources"
+            element={
+              <RoleGuard allowedRoles={['USER', 'MANAGER', 'ADMIN']}>
+                <MainLayout><ResourceCatalogPage /></MainLayout>
+              </RoleGuard>
             }
           />
           
@@ -86,6 +96,14 @@ const AppRoutes = () => {
             element={
               <RoleGuard allowedRoles={['ADMIN']}>
                 <MainLayout><AdminUsersPage /></MainLayout>
+              </RoleGuard>
+            }
+          />
+          <Route
+            path="/admin/bookings"
+            element={
+              <RoleGuard allowedRoles={['ADMIN']}>
+                <MainLayout><AdminBookingRequestsPage /></MainLayout>
               </RoleGuard>
             }
           />

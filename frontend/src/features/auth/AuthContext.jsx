@@ -34,7 +34,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = () => {
-    window.location.href = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/oauth2/authorization/google`;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+    if (!baseUrl) {
+      console.error('VITE_API_BASE_URL is not defined in .env');
+      return;
+    }
+
+    window.location.href = `${baseUrl}/oauth2/authorization/google`;
   };
 
   return (

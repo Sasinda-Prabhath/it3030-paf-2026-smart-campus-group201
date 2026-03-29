@@ -5,7 +5,6 @@ import com.smartcampus.user.dto.UpdateRoleDto;
 import com.smartcampus.user.dto.UpdateClassificationDto;
 import com.smartcampus.user.dto.UpdateStatusDto;
 import com.smartcampus.user.entity.User;
-import com.smartcampus.user.entity.Role;
 import com.smartcampus.user.entity.AccountStatus;
 import com.smartcampus.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
