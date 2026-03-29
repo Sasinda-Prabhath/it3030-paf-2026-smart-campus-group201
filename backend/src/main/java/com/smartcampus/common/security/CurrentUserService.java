@@ -2,6 +2,7 @@ package com.smartcampus.common.security;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +20,25 @@ public class CurrentUserService {
     }
 
     public String getCurrentUserEmail() {
-        OAuth2User oauth2User = getCurrentOAuth2User();
-        return oauth2User != null ? oauth2User.getAttribute("email") : null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return null;
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof OAuth2User oauth2User) {
+            return oauth2User.getAttribute("email");
+        }
+
+        if (principal instanceof UserDetails userDetails) {
+            return userDetails.getUsername();
+        }
+
+        if (principal instanceof String principalText && !"anonymousUser".equalsIgnoreCase(principalText)) {
+            return principalText;
+        }
+
+        return null;
     }
 
     // Placeholder for future User entity integration

@@ -23,8 +23,6 @@ public class SecurityConfig {
 
     @Autowired(required = false)
     private ClientRegistrationRepository clientRegistrationRepository;
-    @Autowired
-    private OAuth2LoginSuccessHandler oauth2LoginSuccessHandler;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -73,19 +71,6 @@ public class SecurityConfig {
             .invalidateHttpSession(true)
             .clearAuthentication(true)
         );
-                .requestMatchers("/api/staff/**").hasAnyRole("ADMIN", "MANAGER", "TECHNICIAN")
-                .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .loginPage("/oauth2/authorization/google")
-                .successHandler(oauth2LoginSuccessHandler)
-                .failureUrl("/login?error")
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-            );
 
         return http.build();
     }
