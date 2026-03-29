@@ -231,8 +231,12 @@ const AddResourceModal = ({
       return '';
     }
 
-    if (value.length > 5) {
-      return 'Name cannot exceed 5 characters.';
+    if (isFacility && value.length > 5) {
+      return 'Facility name cannot exceed 5 characters.';
+    }
+
+    if (!isFacility && value.length > 30) {
+      return 'Asset name cannot exceed 30 characters.';
     }
 
     if (/^\d+$/.test(value)) {
@@ -240,19 +244,35 @@ const AddResourceModal = ({
     }
 
     if (!/^[A-Z]/.test(value)) {
-      return 'Name must start with a capital letter.';
+      return `${isFacility ? 'Facility' : 'Asset'} name must start with a capital letter.`;
     }
 
     return '';
   };
 
-  const validateCapacity = (value) => {
+  const validateCapacity = (value, statusValue = form.status) => {
     if (value === '' || value === null || value === undefined) {
       return '';
     }
 
-    if (Number(value) < 1) {
+    const numericValue = Number(value);
+    if (Number.isNaN(numericValue)) {
+      return 'Amount must be a valid number.';
+    }
+
+    if (isFacility && numericValue < 1) {
       return 'Value cannot be less than 1.';
+    }
+
+    if (!isFacility && statusValue === 'OUT_OF_STOCK') {
+      if (numericValue !== 0) {
+        return 'Out of Stock amount must be 0.';
+      }
+      return '';
+    }
+
+    if (!isFacility && statusValue === 'AVAILABLE' && numericValue <= 0) {
+      return 'Available amount must be greater than 0.';
     }
 
     return '';
@@ -273,6 +293,13 @@ const AddResourceModal = ({
       setCapacityError('');
     }
   }, [initialValues, isOpen, locationOptions, statusOptions, typeOptions]);
+
+  useEffect(() => {
+    if (!isFacility && form.status === 'OUT_OF_STOCK' && form.capacity !== '0') {
+      setForm((prev) => ({ ...prev, capacity: '0' }));
+      setCapacityError('');
+    }
+  }, [form.capacity, form.status, isFacility]);
 
   if (!isOpen) {
     return null;
@@ -319,6 +346,7 @@ const AddResourceModal = ({
 
     const payload = {
       ...form,
+      capacity: !isFacility && form.status === 'OUT_OF_STOCK' ? '0' : form.capacity,
       availabilityWindow: isFacility ? `${form.availabilityFrom} - ${form.availabilityTo}` : '',
       availableFromDate: shouldUseAvailableDates ? form.availableFromDate : '',
       availableToDate: shouldUseAvailableDates ? form.availableToDate : '',
@@ -382,10 +410,11 @@ const AddResourceModal = ({
             {isFacility ? 'Seating Capacity' : 'Available Amount'}: *
             <input
               required
-              min="1"
+              min={isFacility ? '1' : form.status === 'OUT_OF_STOCK' ? '0' : '1'}
               type="number"
               placeholder={isFacility ? 'Enter seating capacity' : 'Enter available amount'}
               value={form.capacity}
+              disabled={!isFacility && form.status === 'OUT_OF_STOCK'}
               onChange={(event) => {
                 const value = event.target.value;
                 setForm((prev) => ({ ...prev, capacity: value }));
@@ -393,7 +422,7 @@ const AddResourceModal = ({
               }}
               className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
                 capacityError ? 'border-red-500 focus:ring-red-400' : 'border-slate-300 focus:ring-blue-500'
-              }`}
+              } ${!isFacility && form.status === 'OUT_OF_STOCK' ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : ''}`}
             />
             {capacityError && <p className="text-xs text-red-600 mt-0.5">{capacityError}</p>}
           </div>
@@ -508,14 +537,27 @@ const AddResourceModal = ({
                     checked={form.status === status}
                     onChange={(event) => {
                       const nextStatus = event.target.value;
+                      const nextCapacity = !isFacility
+                        ? nextStatus === 'OUT_OF_STOCK'
+                          ? '0'
+                          : form.capacity === '0'
+                            ? ''
+                            : form.capacity
+                        : form.capacity;
+
                       setForm((prev) => ({
                         ...prev,
                         status: nextStatus,
+                        capacity: nextCapacity,
                         availableFromDate: ['ACTIVE', 'AVAILABLE'].includes(nextStatus) ? prev.availableFromDate : '',
                         availableToDate: ['ACTIVE', 'AVAILABLE'].includes(nextStatus) ? prev.availableToDate : '',
                         unavailableFromDate: ['OUT_OF_SERVICE', 'OUT_OF_STOCK'].includes(nextStatus) ? prev.unavailableFromDate : '',
                         unavailableToDate: ['OUT_OF_SERVICE', 'OUT_OF_STOCK'].includes(nextStatus) ? prev.unavailableToDate : '',
                       }));
+
+                      if (!isFacility) {
+                        setCapacityError(validateCapacity(nextCapacity, nextStatus));
+                      }
                     }}
                     className="accent-blue-600"
                   />
