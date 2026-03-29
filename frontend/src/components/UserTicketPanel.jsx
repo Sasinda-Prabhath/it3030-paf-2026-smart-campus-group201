@@ -1,14 +1,25 @@
 import { useEffect, useState } from 'react';
 import { ticketsApi } from '../api/tickets';
 
+const STATUS_BADGE_CLASS = {
+  OPEN: 'bg-amber-100 text-amber-800 border border-amber-200',
+  IN_PROGRESS: 'bg-blue-100 text-blue-800 border border-blue-200',
+  RESOLVED: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+  CLOSED: 'bg-gray-200 text-gray-800 border border-gray-300',
+};
+
 const UserTicketPanel = () => {
   const [tickets, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [commenting, setCommenting] = useState(false);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', location: '' });
+  const [createAttachments, setCreateAttachments] = useState([]);
+  const [editForm, setEditForm] = useState({ title: '', description: '', location: '' });
   const [newComment, setNewComment] = useState('');
 
   const loadTickets = async () => {
@@ -39,10 +50,69 @@ const UserTicketPanel = () => {
     try {
       const response = await ticketsApi.getMyTicket(ticketId);
       setSelectedTicket(response.data);
+      setEditForm({
+        title: response.data?.title || '',
+        description: response.data?.description || '',
+        location: response.data?.location || '',
+      });
       setNewComment('');
     } catch (error) {
       console.error('Failed to load ticket detail', error);
       window.alert('Failed to load ticket detail');
+    }
+  };
+
+  const updateTicket = async (event) => {
+    event.preventDefault();
+    if (!selectedTicket?.id) {
+      return;
+    }
+
+    if (!editForm.title.trim() || !editForm.description.trim() || !editForm.location.trim()) {
+      window.alert('Please fill all ticket fields.');
+      return;
+    }
+
+    setUpdating(true);
+    try {
+      await ticketsApi.updateMyTicket(selectedTicket.id, {
+        title: editForm.title.trim(),
+        description: editForm.description.trim(),
+        location: editForm.location.trim(),
+      });
+      await loadTickets();
+      await openTicket(selectedTicket.id);
+    } catch (error) {
+      console.error('Failed to update ticket', error);
+      window.alert(error?.response?.data?.message || 'Failed to update ticket');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const deleteTicket = async () => {
+    const ticketId = Number(selectedTicket?.id ?? selectedTicket?.ticketId);
+    if (!Number.isFinite(ticketId) || ticketId <= 0) {
+      window.alert('Cannot delete this ticket right now. Please re-open the ticket and try again.');
+      return;
+    }
+    const shouldDelete = window.confirm('Delete this ticket? This will remove comments and attachments too.');
+    if (!shouldDelete) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      await ticketsApi.deleteMyTicket(ticketId);
+      setSelectedTicket(null);
+      setEditForm({ title: '', description: '', location: '' });
+      setNewComment('');
+      await loadTickets();
+    } catch (error) {
+      console.error('Failed to delete ticket', error);
+      window.alert(error?.response?.data?.message || 'Failed to delete ticket');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -62,7 +132,14 @@ const UserTicketPanel = () => {
         location: form.location,
       });
 
+      if (createAttachments.length > 0) {
+        for (const file of createAttachments) {
+          await ticketsApi.uploadAttachment(response.data.id, file);
+        }
+      }
+
       setForm({ title: '', description: '', location: '' });
+      setCreateAttachments([]);
       await loadTickets();
       await openTicket(response.data.id);
     } catch (error) {
@@ -168,6 +245,18 @@ const UserTicketPanel = () => {
           onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
           className="md:col-span-3 rounded-md border border-gray-300 px-3 py-2 text-sm min-h-[90px]"
         />
+        <div className="md:col-span-3">
+          <label className="block text-sm text-gray-700 mb-1">Attachments (optional)</label>
+          <input
+            type="file"
+            multiple
+            onChange={(e) => setCreateAttachments(Array.from(e.target.files || []))}
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+          />
+          {createAttachments.length > 0 && (
+            <p className="text-xs text-gray-600 mt-1">{createAttachments.length} file(s) selected. They will upload after ticket creation.</p>
+          )}
+        </div>
       </form>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -201,7 +290,7 @@ const UserTicketPanel = () => {
                   <p className="font-medium text-gray-900">{ticket.title}</p>
                   <p className="text-xs text-gray-500 mt-1">{ticket.location}</p>
                   <p className="text-xs mt-1">
-                    <span className="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
+                    <span className={`px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE_CLASS[ticket.status] || 'bg-gray-100 text-gray-700 border border-gray-200'}`}>
                       {ticket.status}
                     </span>
                   </p>
@@ -216,9 +305,48 @@ const UserTicketPanel = () => {
             <p className="text-sm text-gray-500">Select a ticket to view details and comments.</p>
           ) : (
             <>
-              <h3 className="font-semibold text-gray-900">{selectedTicket.title}</h3>
-              <p className="text-sm text-gray-600 mt-1">{selectedTicket.location}</p>
-              <p className="text-sm text-gray-700 mt-3">{selectedTicket.description}</p>
+              <form onSubmit={updateTicket} className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="font-semibold text-gray-900">Edit Ticket</h3>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE_CLASS[selectedTicket.status] || 'bg-gray-100 text-gray-700 border border-gray-200'}`}>
+                    {selectedTicket.status}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      disabled={updating}
+                      className="rounded-md bg-blue-600 text-white px-3 py-1.5 text-sm hover:bg-blue-700 disabled:opacity-60"
+                    >
+                      {updating ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={deleteTicket}
+                      disabled={deleting}
+                      className="rounded-md bg-red-600 text-white px-3 py-1.5 text-sm hover:bg-red-700 disabled:opacity-60"
+                    >
+                      {deleting ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                />
+                <input
+                  type="text"
+                  value={editForm.location}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, location: e.target.value }))}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                />
+                <textarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm min-h-[80px]"
+                />
+              </form>
 
               <div className="mt-4 space-y-2 max-h-64 overflow-y-auto pr-1">
                 {(selectedTicket.comments || []).length === 0 ? (

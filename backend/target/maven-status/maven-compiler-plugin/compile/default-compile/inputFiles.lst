@@ -35,11 +35,14 @@ C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart
 C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\SmartCampusApplication.java
 C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\controller\TicketController.java
 C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\dto\AddTicketCommentDto.java
+C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\dto\AssignTicketDto.java
 C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\dto\CreateTicketDto.java
 C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\dto\TicketAttachmentDto.java
 C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\dto\TicketCommentDto.java
 C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\dto\TicketDetailDto.java
 C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\dto\TicketDto.java
+C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\dto\UpdateTicketDto.java
+C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\dto\UpdateTicketStatusDto.java
 C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\entity\Ticket.java
 C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\entity\TicketAttachment.java
 C:\Users\sasin\Music\it3030-paf-2026-smart-campus-group201\it3030-paf-2026-smart-campus-group201\backend\src\main\java\com\smartcampus\ticket\entity\TicketComment.java

@@ -2,11 +2,14 @@ package com.smartcampus.ticket.service;
 
 import com.smartcampus.common.security.CurrentUserService;
 import com.smartcampus.ticket.dto.AddTicketCommentDto;
+import com.smartcampus.ticket.dto.AssignTicketDto;
 import com.smartcampus.ticket.dto.CreateTicketDto;
 import com.smartcampus.ticket.dto.TicketAttachmentDto;
 import com.smartcampus.ticket.dto.TicketCommentDto;
 import com.smartcampus.ticket.dto.TicketDetailDto;
 import com.smartcampus.ticket.dto.TicketDto;
+import com.smartcampus.ticket.dto.UpdateTicketDto;
+import com.smartcampus.ticket.dto.UpdateTicketStatusDto;
 import com.smartcampus.ticket.entity.Ticket;
 import com.smartcampus.ticket.entity.TicketAttachment;
 import com.smartcampus.ticket.entity.TicketComment;
@@ -14,6 +17,7 @@ import com.smartcampus.ticket.entity.TicketStatus;
 import com.smartcampus.ticket.repository.TicketAttachmentRepository;
 import com.smartcampus.ticket.repository.TicketCommentRepository;
 import com.smartcampus.ticket.repository.TicketRepository;
+import com.smartcampus.user.entity.Role;
 import com.smartcampus.user.entity.User;
 import com.smartcampus.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -90,27 +95,189 @@ public class TicketService {
             .toList();
     }
 
+    public List<TicketDto> getAssignedTickets() {
+        User currentUser = getCurrentUser();
+
+        List<Ticket> assigned = ticketRepository.findByAssignedToEmailOrderByUpdatedAtDesc(currentUser.getEmail());
+        if (assigned.isEmpty() && (currentUser.getRole() == Role.TECHNICIAN || currentUser.getRole() == Role.MANAGER)) {
+            assigned = ticketRepository.findAssignedQueueOrderByUpdatedAtDesc();
+        }
+
+        return assigned
+            .stream()
+            .map(this::mapTicket)
+            .toList();
+    }
+
+    public List<TicketDto> getAllTicketsForAdmin() {
+        User currentUser = getCurrentUser();
+        ensureAdmin(currentUser);
+
+        return ticketRepository.findAllByOrderByCreatedAtDesc()
+            .stream()
+            .map(this::mapTicket)
+            .toList();
+    }
+
     public TicketDetailDto getMyTicket(@NonNull Long ticketId) {
         User currentUser = getCurrentUser();
         Ticket ticket = getOwnedTicket(ticketId, currentUser);
 
-        TicketDetailDto detail = new TicketDetailDto();
-        copyTicket(detail, ticket);
-        detail.setComments(ticketCommentRepository.findByTicketIdOrderByCreatedAtAsc(ticketId)
-            .stream()
-            .map(this::mapComment)
-            .toList());
-        detail.setAttachments(ticketAttachmentRepository.findByTicketIdOrderByUploadedAtAsc(ticketId)
-            .stream()
-            .map(this::mapAttachment)
-            .toList());
+        return buildDetail(ticket);
+    }
 
-        return detail;
+    public TicketDto updateMyTicket(@NonNull Long ticketId, @NonNull UpdateTicketDto dto) {
+        User currentUser = getCurrentUser();
+        Ticket ticket = getOwnedTicket(ticketId, currentUser);
+
+        ticket.setTitle(dto.getTitle().trim());
+        ticket.setDescription(dto.getDescription().trim());
+        ticket.setLocation(dto.getLocation().trim());
+        ticket.setUpdatedAt(LocalDateTime.now());
+
+        return mapTicket(ticketRepository.save(ticket));
+    }
+
+    @Transactional
+    public void deleteMyTicket(@NonNull Long ticketId) {
+        User currentUser = getCurrentUser();
+        Ticket ticket = getOwnedTicket(ticketId, currentUser);
+        deleteTicketAndResources(ticket);
+    }
+
+    public TicketDetailDto getAssignedTicket(@NonNull Long ticketId) {
+        User currentUser = getCurrentUser();
+        Ticket ticket = getAssignedTicketForTechnician(ticketId, currentUser);
+
+        return buildDetail(ticket);
+    }
+
+    public TicketDetailDto getTicketForAdmin(@NonNull Long ticketId) {
+        User currentUser = getCurrentUser();
+        ensureAdmin(currentUser);
+        Ticket ticket = getTicketOrThrow(ticketId);
+
+        return buildDetail(ticket);
+    }
+
+    @Transactional
+    public void deleteTicketAsAdmin(@NonNull Long ticketId) {
+        User currentUser = getCurrentUser();
+        ensureAdmin(currentUser);
+        Ticket ticket = getTicketOrThrow(ticketId);
+        deleteTicketAndResources(ticket);
+    }
+
+    public TicketDto assignTicket(@NonNull Long ticketId, @NonNull AssignTicketDto dto) {
+        User currentUser = getCurrentUser();
+        ensureAdmin(currentUser);
+
+        Ticket ticket = getTicketOrThrow(ticketId);
+
+        String assigneeEmail = dto.getAssignedToEmail().trim();
+        User assignee = userRepository.findByEmailIgnoreCase(assigneeEmail)
+            .orElseThrow(() -> new IllegalArgumentException("Assigned technician not found"));
+
+        if (assignee.getRole() != Role.TECHNICIAN && assignee.getRole() != Role.MANAGER) {
+            throw new IllegalArgumentException("Ticket can only be assigned to TECHNICIAN or MANAGER");
+        }
+
+        ticket.setAssignedToEmail(assignee.getEmail());
+        ticket.setAssignedToName(normalizeName(assignee));
+        ticket.setUpdatedAt(LocalDateTime.now());
+
+        return mapTicket(ticketRepository.save(ticket));
+    }
+
+    public TicketDto updateAssignedTicketStatus(@NonNull Long ticketId, @NonNull UpdateTicketStatusDto dto) {
+        User currentUser = getCurrentUser();
+        Ticket ticket = getAssignedTicketForTechnician(ticketId, currentUser);
+
+        ticket.setStatus(parseStatus(dto.getStatus()));
+        ticket.setUpdatedAt(LocalDateTime.now());
+
+        return mapTicket(ticketRepository.save(ticket));
+    }
+
+    public TicketDto updateTicketStatusForAdmin(@NonNull Long ticketId, @NonNull UpdateTicketStatusDto dto) {
+        User currentUser = getCurrentUser();
+        ensureAdmin(currentUser);
+
+        Ticket ticket = getTicketOrThrow(ticketId);
+        ticket.setStatus(parseStatus(dto.getStatus()));
+        ticket.setUpdatedAt(LocalDateTime.now());
+
+        return mapTicket(ticketRepository.save(ticket));
     }
 
     public TicketAttachmentDto uploadAttachment(@NonNull Long ticketId, @NonNull MultipartFile file) {
         User currentUser = getCurrentUser();
         Ticket ticket = getOwnedTicket(ticketId, currentUser);
+
+        return saveAttachment(ticket, currentUser, file);
+    }
+
+    public TicketAttachmentDto uploadAttachmentToAssignedTicket(@NonNull Long ticketId, @NonNull MultipartFile file) {
+        User currentUser = getCurrentUser();
+        Ticket ticket = getAssignedTicketForTechnician(ticketId, currentUser);
+
+        return saveAttachment(ticket, currentUser, file);
+    }
+
+    public TicketAttachmentDto uploadAttachmentToTicketAsAdmin(@NonNull Long ticketId, @NonNull MultipartFile file) {
+        User currentUser = getCurrentUser();
+        ensureAdmin(currentUser);
+
+        Ticket ticket = getTicketOrThrow(ticketId);
+
+        return saveAttachment(ticket, currentUser, file);
+    }
+
+    public AttachmentDownload downloadAttachment(@NonNull Long ticketId, @NonNull Long attachmentId) {
+        User currentUser = getCurrentUser();
+        getOwnedTicket(ticketId, currentUser);
+
+        return buildAttachmentDownload(ticketId, attachmentId);
+    }
+
+    public AttachmentDownload downloadAttachmentForAssignedTicket(@NonNull Long ticketId, @NonNull Long attachmentId) {
+        User currentUser = getCurrentUser();
+        getAssignedTicketForTechnician(ticketId, currentUser);
+
+        return buildAttachmentDownload(ticketId, attachmentId);
+    }
+
+    public AttachmentDownload downloadAttachmentForAdmin(@NonNull Long ticketId, @NonNull Long attachmentId) {
+        User currentUser = getCurrentUser();
+        ensureAdmin(currentUser);
+        getTicketOrThrow(ticketId);
+
+        return buildAttachmentDownload(ticketId, attachmentId);
+    }
+
+    public TicketCommentDto addComment(@NonNull Long ticketId, @NonNull AddTicketCommentDto dto) {
+        User currentUser = getCurrentUser();
+        Ticket ticket = getOwnedTicket(ticketId, currentUser);
+
+        return saveComment(ticket, currentUser, dto);
+    }
+
+    public TicketCommentDto addCommentToAssignedTicket(@NonNull Long ticketId, @NonNull AddTicketCommentDto dto) {
+        User currentUser = getCurrentUser();
+        Ticket ticket = getAssignedTicketForTechnician(ticketId, currentUser);
+
+        return saveComment(ticket, currentUser, dto);
+    }
+
+    public TicketCommentDto addCommentToTicketAsAdmin(@NonNull Long ticketId, @NonNull AddTicketCommentDto dto) {
+        User currentUser = getCurrentUser();
+        ensureAdmin(currentUser);
+        Ticket ticket = getTicketOrThrow(ticketId);
+
+        return saveComment(ticket, currentUser, dto);
+    }
+
+    private TicketAttachmentDto saveAttachment(Ticket ticket, User currentUser, MultipartFile file) {
 
         if (file.isEmpty()) {
             throw new IllegalArgumentException("Attachment file is empty");
@@ -147,10 +314,7 @@ public class TicketService {
         return mapAttachment(ticketAttachmentRepository.save(attachment));
     }
 
-    public AttachmentDownload downloadAttachment(@NonNull Long ticketId, @NonNull Long attachmentId) {
-        User currentUser = getCurrentUser();
-        getOwnedTicket(ticketId, currentUser);
-
+    private AttachmentDownload buildAttachmentDownload(Long ticketId, Long attachmentId) {
         TicketAttachment attachment = ticketAttachmentRepository.findByIdAndTicketId(attachmentId, ticketId)
             .orElseThrow(() -> new IllegalArgumentException("Attachment not found"));
 
@@ -168,10 +332,7 @@ public class TicketService {
         );
     }
 
-    public TicketCommentDto addComment(@NonNull Long ticketId, @NonNull AddTicketCommentDto dto) {
-        User currentUser = getCurrentUser();
-        Ticket ticket = getOwnedTicket(ticketId, currentUser);
-
+    private TicketCommentDto saveComment(Ticket ticket, User currentUser, AddTicketCommentDto dto) {
         TicketComment comment = new TicketComment();
         comment.setTicketId(ticket.getId());
         comment.setAuthorEmail(currentUser.getEmail());
@@ -185,25 +346,112 @@ public class TicketService {
         return mapComment(ticketCommentRepository.save(comment));
     }
 
+    private TicketDetailDto buildDetail(Ticket ticket) {
+        TicketDetailDto detail = new TicketDetailDto();
+        copyTicket(detail, ticket);
+        detail.setComments(ticketCommentRepository.findByTicketIdOrderByCreatedAtAsc(ticket.getId())
+            .stream()
+            .map(this::mapComment)
+            .toList());
+        detail.setAttachments(ticketAttachmentRepository.findByTicketIdOrderByUploadedAtAsc(ticket.getId())
+            .stream()
+            .map(this::mapAttachment)
+            .toList());
+        return detail;
+    }
+
+    private void deleteTicketAndResources(Ticket ticket) {
+        try {
+            List<TicketAttachment> attachments = ticketAttachmentRepository.findByTicketId(ticket.getId());
+            for (TicketAttachment attachment : attachments) {
+                try {
+                    Files.deleteIfExists(attachmentStoragePath.resolve(attachment.getStoredFileName()).normalize());
+                } catch (IOException ignored) {
+                    // Ignore file deletion failures and continue DB cleanup.
+                }
+            }
+
+            if (!attachments.isEmpty()) {
+                ticketAttachmentRepository.deleteAll(attachments);
+            }
+
+            List<TicketComment> comments = ticketCommentRepository.findByTicketId(ticket.getId());
+            if (!comments.isEmpty()) {
+                ticketCommentRepository.deleteAll(comments);
+            }
+
+            ticketRepository.deleteById(ticket.getId());
+        } catch (Exception exception) {
+            String message = exception.getMessage();
+            if (message == null || message.isBlank()) {
+                message = exception.getClass().getSimpleName();
+            }
+            throw new IllegalArgumentException("Failed to delete ticket: " + message);
+        }
+    }
+
     private User getCurrentUser() {
         String email = currentUserService.getCurrentUserEmail();
         if (email == null || email.isBlank()) {
             throw new AccessDeniedException("No authenticated user found");
         }
 
-        return userRepository.findByEmail(email)
+        return userRepository.findByEmailIgnoreCase(email)
             .orElseThrow(() -> new IllegalArgumentException("Current user not found"));
     }
 
     private Ticket getOwnedTicket(Long ticketId, User currentUser) {
-        Ticket ticket = ticketRepository.findById(ticketId)
-            .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
+        Ticket ticket = getTicketOrThrow(ticketId);
 
         if (!ticket.getCreatedByEmail().equalsIgnoreCase(currentUser.getEmail())) {
             throw new AccessDeniedException("You can only access your own tickets");
         }
 
         return ticket;
+    }
+
+    private Ticket getAssignedTicketForTechnician(Long ticketId, User currentUser) {
+        Ticket ticket = getTicketOrThrow(ticketId);
+        if (currentUser.getRole() == Role.ADMIN) {
+            return ticket;
+        }
+
+        String assignedEmail = ticket.getAssignedToEmail() == null ? "" : ticket.getAssignedToEmail().trim();
+        String currentEmail = currentUser.getEmail() == null ? "" : currentUser.getEmail().trim();
+        if (assignedEmail.isBlank() || !assignedEmail.equalsIgnoreCase(currentEmail)) {
+            throw new AccessDeniedException("You can only access tickets assigned to you");
+        }
+
+        return ticket;
+    }
+
+    private Ticket getTicketOrThrow(Long ticketId) {
+        return ticketRepository.findById(ticketId)
+            .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
+    }
+
+    private void ensureAdmin(User user) {
+        if (user.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("Admin access required");
+        }
+    }
+
+    private void ensureTechnician(User user) {
+        if (user.getRole() != Role.TECHNICIAN && user.getRole() != Role.MANAGER && user.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("Technician access required");
+        }
+    }
+
+    private TicketStatus parseStatus(String statusRaw) {
+        if (statusRaw == null || statusRaw.isBlank()) {
+            throw new IllegalArgumentException("Ticket status is required");
+        }
+
+        try {
+            return TicketStatus.valueOf(statusRaw.trim().toUpperCase());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Invalid ticket status");
+        }
     }
 
     private TicketDto mapTicket(Ticket ticket) {
@@ -220,6 +468,8 @@ public class TicketService {
         dto.setStatus(ticket.getStatus().name());
         dto.setCreatedByEmail(ticket.getCreatedByEmail());
         dto.setCreatedByName(ticket.getCreatedByName());
+        dto.setAssignedToEmail(ticket.getAssignedToEmail() == null ? "" : ticket.getAssignedToEmail());
+        dto.setAssignedToName(ticket.getAssignedToName() == null ? "" : ticket.getAssignedToName());
         dto.setCreatedAt(ticket.getCreatedAt() != null ? ticket.getCreatedAt().toString() : "");
         dto.setUpdatedAt(ticket.getUpdatedAt() != null ? ticket.getUpdatedAt().toString() : "");
     }

@@ -9,6 +9,8 @@ public class TicketDto {
     private String status;
     private String createdByEmail;
     private String createdByName;
+    private String assignedToEmail;
+    private String assignedToName;
     private String createdAt;
     private String updatedAt;
 
@@ -32,6 +34,12 @@ public class TicketDto {
 
     public String getCreatedByName() { return createdByName; }
     public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
+
+    public String getAssignedToEmail() { return assignedToEmail; }
+    public void setAssignedToEmail(String assignedToEmail) { this.assignedToEmail = assignedToEmail; }
+
+    public String getAssignedToName() { return assignedToName; }
+    public void setAssignedToName(String assignedToName) { this.assignedToName = assignedToName; }
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }

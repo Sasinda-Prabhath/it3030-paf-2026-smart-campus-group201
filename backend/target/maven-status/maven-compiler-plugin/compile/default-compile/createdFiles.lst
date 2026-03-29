@@ -29,6 +29,7 @@ com\smartcampus\ticket\dto\CreateTicketDto.class
 com\smartcampus\user\dto\UpdateStatusDto.class
 com\smartcampus\user\dto\UpdateClassificationDto.class
 com\smartcampus\booking\entity\BookingRequest.class
+com\smartcampus\ticket\dto\AssignTicketDto.class
 com\smartcampus\SmartCampusApplication.class
 com\smartcampus\ticket\entity\Ticket.class
 com\smartcampus\user\controller\AdminUserController.class
@@ -39,6 +40,7 @@ com\smartcampus\ticket\controller\TicketController.class
 com\smartcampus\notification\repository\NotificationRepository.class
 com\smartcampus\ticket\entity\TicketComment.class
 com\smartcampus\user\dto\UserListDto.class
+com\smartcampus\ticket\dto\UpdateTicketStatusDto.class
 com\smartcampus\common\exception\ErrorResponse.class
 com\smartcampus\resource\service\ResourceCatalogService.class
 com\smartcampus\notification\controller\NotificationController.class
@@ -46,6 +48,7 @@ com\smartcampus\common\security\SecurityConfig.class
 com\smartcampus\user\entity\UserType.class
 com\smartcampus\common\config\CorsProperties.class
 com\smartcampus\common\security\OAuth2LoginSuccessHandler.class
+com\smartcampus\ticket\dto\UpdateTicketDto.class
 com\smartcampus\user\dto\UpdateProfileDto.class
 com\smartcampus\booking\repository\BookingRequestRepository.class
 com\smartcampus\common\security\GoogleOAuth2Config.class

@@ -38,6 +38,12 @@ public class Ticket {
     @Column(nullable = false, length = 255)
     private String createdByName;
 
+    @Column(length = 255)
+    private String assignedToEmail;
+
+    @Column(length = 255)
+    private String assignedToName;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -64,6 +70,12 @@ public class Ticket {
 
     public String getCreatedByName() { return createdByName; }
     public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
+
+    public String getAssignedToEmail() { return assignedToEmail; }
+    public void setAssignedToEmail(String assignedToEmail) { this.assignedToEmail = assignedToEmail; }
+
+    public String getAssignedToName() { return assignedToName; }
+    public void setAssignedToName(String assignedToName) { this.assignedToName = assignedToName; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

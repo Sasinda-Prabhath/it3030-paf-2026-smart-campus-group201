@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface TicketAttachmentRepository extends JpaRepository<TicketAttachment, Long> {
     List<TicketAttachment> findByTicketIdOrderByUploadedAtAsc(Long ticketId);
     Optional<TicketAttachment> findByIdAndTicketId(Long id, Long ticketId);
+    List<TicketAttachment> findByTicketId(Long ticketId);
 }
