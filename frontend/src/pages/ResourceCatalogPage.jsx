@@ -48,15 +48,15 @@ const getAccentClass = (resourceType, itemType) => {
   }
 
   if (itemType === 'LECTURE_HALL') {
-    return 'bg-gradient-to-r from-blue-600 to-indigo-600';
+    return 'bg-gradient-to-r from-sky-300 to-blue-400';
   }
 
   if (itemType === 'LAB') {
-    return 'bg-gradient-to-r from-green-600 to-emerald-600';
+    return 'bg-gradient-to-r from-emerald-300 to-green-400';
   }
 
   if (itemType === 'MEETING_ROOM') {
-    return 'bg-gradient-to-r from-yellow-400 to-amber-400';
+    return 'bg-gradient-to-r from-violet-300 to-purple-400';
   }
 
   return 'bg-gradient-to-r from-slate-500 to-slate-600';
@@ -130,7 +130,7 @@ const formatDateLabel = (value) => {
 };
 
 const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDelete, onBook }) => (
-  <article className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+  <article className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
     <div className={`px-3 py-2 text-white ${accentClass}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -147,7 +147,7 @@ const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDel
       </div>
     </div>
 
-    <div className="px-3 py-3 text-slate-700 space-y-1.5 text-sm">
+    <div className="px-3 py-2.5 text-slate-700 space-y-1 text-sm">
       <p className="leading-snug">
         <span className="font-medium text-slate-800">{FACILITY_TYPES.includes(resource.type) ? 'Seating Capacity:' : 'Available Amount:'}</span> {resource.capacity}
       </p>
@@ -155,19 +155,19 @@ const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDel
         <span className="font-medium text-slate-800">Location:</span> {resource.location}
       </p>
       {resource.availabilityWindow && (
-        <p className="leading-snug whitespace-nowrap">
+        <p className="leading-snug whitespace-nowrap overflow-hidden text-ellipsis text-[13px]">
           <span className="font-medium text-slate-800">Availability Time:</span> {formatAvailabilityWindow(resource.availabilityWindow)}
         </p>
       )}
 
       {(resource.availableFromDate || resource.availableToDate) && (
-        <p className="leading-snug">
+        <p className="leading-snug whitespace-nowrap overflow-hidden text-ellipsis text-[13px]">
           <span className="font-medium text-slate-800">Available Dates:</span> From {formatDateLabel(resource.availableFromDate)} To {formatDateLabel(resource.availableToDate)}
         </p>
       )}
 
       {(resource.unavailableFromDate || resource.unavailableToDate) && (
-        <p className="leading-snug">
+        <p className="leading-snug whitespace-nowrap overflow-hidden text-ellipsis text-[13px]">
           <span className="font-medium text-slate-800">Unavailable Dates:</span> From {formatDateLabel(resource.unavailableFromDate)} To {formatDateLabel(resource.unavailableToDate)}
         </p>
       )}
