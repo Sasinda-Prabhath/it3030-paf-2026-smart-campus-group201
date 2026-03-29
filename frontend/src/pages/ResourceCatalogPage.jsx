@@ -16,6 +16,7 @@ const ASSET_LOCATION_OPTIONS = [
   "Engineering Building's Stock Room",
 ];
 const TIME_HOUR_OPTIONS = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, '0'));
+const TIME_TO_HOUR_OPTIONS = [...TIME_HOUR_OPTIONS, '24'];
 const TIME_MINUTE_OPTIONS = Array.from({ length: 60 }, (_, index) => String(index).padStart(2, '0'));
 
 const emptyFilters = {
@@ -76,15 +77,22 @@ const parseAvailabilityWindow = (availabilityWindow) => {
   return { availabilityFrom: '08:00', availabilityTo: '18:00' };
 };
 
-const getTimeParts = (value) => {
+const getTimeParts = (value, allowedHours = TIME_HOUR_OPTIONS) => {
   const [hours = '00', minutes = '00'] = (value || '00:00').split(':');
+  const normalizedHours = allowedHours.includes(hours) ? hours : allowedHours[0] || '00';
+  const normalizedMinutes = normalizedHours === '24'
+    ? '00'
+    : TIME_MINUTE_OPTIONS.includes(minutes)
+      ? minutes
+      : '00';
+
   return {
-    hours: TIME_HOUR_OPTIONS.includes(hours) ? hours : '00',
-    minutes: TIME_MINUTE_OPTIONS.includes(minutes) ? minutes : '00',
+    hours: normalizedHours,
+    minutes: normalizedMinutes,
   };
 };
 
-const buildTimeValue = (hours, minutes) => `${hours}:${minutes}`;
+const buildTimeValue = (hours, minutes) => `${hours}:${hours === '24' ? '00' : minutes}`;
 
 const formatTimeLabel = (value) => {
   if (!value) {
@@ -213,8 +221,8 @@ const AddResourceModal = ({
   const statusOptions = isFacility ? FACILITY_STATUSES : ASSET_STATUSES;
   const locationOptions = isFacility ? FACILITY_LOCATION_OPTIONS : ASSET_LOCATION_OPTIONS;
   const today = new Date().toISOString().split('T')[0];
-  const availabilityFromParts = getTimeParts(form.availabilityFrom);
-  const availabilityToParts = getTimeParts(form.availabilityTo);
+  const availabilityFromParts = getTimeParts(form.availabilityFrom, TIME_TO_HOUR_OPTIONS);
+  const availabilityToParts = getTimeParts(form.availabilityTo, TIME_TO_HOUR_OPTIONS);
 
   useEffect(() => {
     if (isOpen) {
@@ -363,7 +371,7 @@ const AddResourceModal = ({
                       }))}
                       className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      {TIME_HOUR_OPTIONS.map((hour) => (
+                      {TIME_TO_HOUR_OPTIONS.map((hour) => (
                         <option key={hour} value={hour}>
                           {hour}
                         </option>
@@ -377,9 +385,10 @@ const AddResourceModal = ({
                         ...prev,
                         availabilityFrom: buildTimeValue(availabilityFromParts.hours, event.target.value),
                       }))}
-                      className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={availabilityFromParts.hours === '24'}
+                      className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-400"
                     >
-                      {TIME_MINUTE_OPTIONS.map((minute) => (
+                      {(availabilityFromParts.hours === '24' ? ['00'] : TIME_MINUTE_OPTIONS).map((minute) => (
                         <option key={minute} value={minute}>
                           {minute}
                         </option>
@@ -399,7 +408,7 @@ const AddResourceModal = ({
                       }))}
                       className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      {TIME_HOUR_OPTIONS.map((hour) => (
+                      {TIME_TO_HOUR_OPTIONS.map((hour) => (
                         <option key={hour} value={hour}>
                           {hour}
                         </option>
@@ -413,9 +422,10 @@ const AddResourceModal = ({
                         ...prev,
                         availabilityTo: buildTimeValue(availabilityToParts.hours, event.target.value),
                       }))}
-                      className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={availabilityToParts.hours === '24'}
+                      className="px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-400"
                     >
-                      {TIME_MINUTE_OPTIONS.map((minute) => (
+                      {(availabilityToParts.hours === '24' ? ['00'] : TIME_MINUTE_OPTIONS).map((minute) => (
                         <option key={minute} value={minute}>
                           {minute}
                         </option>
