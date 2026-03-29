@@ -3,13 +3,16 @@ com\smartcampus\auth\dto\CurrentUserDto.class
 com\smartcampus\common\exception\GlobalExceptionHandler.class
 com\smartcampus\ticket\repository\TicketRepository.class
 com\smartcampus\ticket\repository\TicketCommentRepository.class
+com\smartcampus\ticket\repository\TicketAttachmentRepository.class
 META-INF\spring-configuration-metadata.json
+com\smartcampus\ticket\entity\TicketAttachment.class
 com\smartcampus\user\dto\UpdateRoleDto.class
 com\smartcampus\resource\controller\ResourceCatalogController.class
 com\smartcampus\ticket\dto\TicketDetailDto.class
 com\smartcampus\ticket\dto\AddTicketCommentDto.class
 com\smartcampus\ticket\dto\TicketDto.class
 com\smartcampus\auth\controller\AuthController.class
+com\smartcampus\ticket\dto\TicketAttachmentDto.class
 com\smartcampus\booking\controller\BookingRequestController.class
 com\smartcampus\booking\service\BookingRequestService.class
 com\smartcampus\user\service\AdminUserService.class
@@ -20,6 +23,7 @@ com\smartcampus\common\util\Constants.class
 com\smartcampus\common\config\CorsConfig.class
 com\smartcampus\notification\dto\NotificationDto.class
 com\smartcampus\booking\entity\BookingStatus.class
+com\smartcampus\common\config\DatabaseConstraintFixer.class
 com\smartcampus\common\security\CurrentUserService.class
 com\smartcampus\ticket\dto\CreateTicketDto.class
 com\smartcampus\user\dto\UpdateStatusDto.class
@@ -60,3 +64,4 @@ com\smartcampus\user\entity\User.class
 com\smartcampus\booking\dto\ReviewBookingRequestDto.class
 com\smartcampus\notification\service\NotificationService.class
 com\smartcampus\ticket\service\TicketService.class
+com\smartcampus\ticket\service\TicketService$AttachmentDownload.class

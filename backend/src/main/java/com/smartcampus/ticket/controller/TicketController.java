@@ -2,20 +2,26 @@ package com.smartcampus.ticket.controller;
 
 import com.smartcampus.ticket.dto.AddTicketCommentDto;
 import com.smartcampus.ticket.dto.CreateTicketDto;
+import com.smartcampus.ticket.dto.TicketAttachmentDto;
 import com.smartcampus.ticket.dto.TicketCommentDto;
 import com.smartcampus.ticket.dto.TicketDetailDto;
 import com.smartcampus.ticket.dto.TicketDto;
 import com.smartcampus.ticket.service.TicketService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -47,5 +53,26 @@ public class TicketController {
         @Valid @RequestBody AddTicketCommentDto dto
     ) {
         return ResponseEntity.ok(ticketService.addComment(id, dto));
+    }
+
+    @PostMapping(value = "/my/{id}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<TicketAttachmentDto> uploadAttachment(
+        @PathVariable @NonNull Long id,
+        @RequestParam("file") MultipartFile file
+    ) {
+        return ResponseEntity.ok(ticketService.uploadAttachment(id, file));
+    }
+
+    @GetMapping("/my/{ticketId}/attachments/{attachmentId}")
+    public ResponseEntity<Resource> downloadAttachment(
+        @PathVariable @NonNull Long ticketId,
+        @PathVariable @NonNull Long attachmentId
+    ) {
+        TicketService.AttachmentDownload download = ticketService.downloadAttachment(ticketId, attachmentId);
+
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(download.getContentType()))
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + download.getFileName() + "\"")
+            .body(download.getResource());
     }
 }

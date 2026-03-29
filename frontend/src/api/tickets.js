@@ -23,6 +23,18 @@ const normalizeComment = (comment) => ({
   createdAt: comment.createdAt || '',
 });
 
+const normalizeAttachment = (attachment) => ({
+  ...attachment,
+  id: attachment.id,
+  ticketId: attachment.ticketId,
+  originalFileName: attachment.originalFileName || '',
+  contentType: attachment.contentType || 'application/octet-stream',
+  fileSizeBytes: attachment.fileSizeBytes || 0,
+  uploadedByEmail: attachment.uploadedByEmail || '',
+  uploadedByName: attachment.uploadedByName || '',
+  uploadedAt: attachment.uploadedAt || '',
+});
+
 export const ticketsApi = {
   async create(payload) {
     const response = await apiClient.post('/api/tickets', payload);
@@ -49,6 +61,9 @@ export const ticketsApi = {
         comments: Array.isArray(response.data?.comments)
           ? response.data.comments.map(normalizeComment)
           : [],
+        attachments: Array.isArray(response.data?.attachments)
+          ? response.data.attachments.map(normalizeAttachment)
+          : [],
       },
     };
   },
@@ -59,5 +74,22 @@ export const ticketsApi = {
       ...response,
       data: normalizeComment(response.data),
     };
+  },
+
+  async uploadAttachment(ticketId, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await apiClient.post(`/api/tickets/my/${ticketId}/attachments`, formData);
+
+    return {
+      ...response,
+      data: normalizeAttachment(response.data),
+    };
+  },
+
+  getAttachmentDownloadUrl(ticketId, attachmentId) {
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
+    return `${baseUrl}/api/tickets/my/${ticketId}/attachments/${attachmentId}`;
   },
 };

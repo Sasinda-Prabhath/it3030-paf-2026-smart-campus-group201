@@ -7,6 +7,7 @@ const UserTicketPanel = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [commenting, setCommenting] = useState(false);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', location: '' });
   const [newComment, setNewComment] = useState('');
 
@@ -94,6 +95,45 @@ const UserTicketPanel = () => {
     } finally {
       setCommenting(false);
     }
+  };
+
+  const handleAttachmentUpload = async (event) => {
+    if (!selectedTicket?.id) {
+      return;
+    }
+
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setUploadingAttachment(true);
+    try {
+      await ticketsApi.uploadAttachment(selectedTicket.id, file);
+      await openTicket(selectedTicket.id);
+    } catch (error) {
+      console.error('Failed to upload attachment', error);
+      window.alert(error?.response?.data?.message || 'Failed to upload attachment');
+    } finally {
+      event.target.value = '';
+      setUploadingAttachment(false);
+    }
+  };
+
+  const formatFileSize = (sizeInBytes) => {
+    if (!sizeInBytes) {
+      return '0 B';
+    }
+
+    if (sizeInBytes < 1024) {
+      return `${sizeInBytes} B`;
+    }
+
+    if (sizeInBytes < 1024 * 1024) {
+      return `${(sizeInBytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   return (
@@ -190,6 +230,40 @@ const UserTicketPanel = () => {
                       <p className="text-sm text-gray-800">{comment.comment}</p>
                     </div>
                   ))
+                )}
+              </div>
+
+              <div className="mt-4 border-t border-gray-200 pt-4">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <h4 className="text-sm font-semibold text-gray-900">Attachments</h4>
+                  <label className="text-sm text-blue-600 hover:underline cursor-pointer">
+                    {uploadingAttachment ? 'Uploading...' : 'Upload file'}
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={handleAttachmentUpload}
+                      disabled={uploadingAttachment}
+                    />
+                  </label>
+                </div>
+
+                {(selectedTicket.attachments || []).length === 0 ? (
+                  <p className="text-sm text-gray-500">No attachments yet.</p>
+                ) : (
+                  <div className="space-y-1">
+                    {(selectedTicket.attachments || []).map((attachment) => (
+                      <a
+                        key={attachment.id}
+                        href={ticketsApi.getAttachmentDownloadUrl(selectedTicket.id, attachment.id)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md px-2 py-1 text-sm text-blue-700 hover:bg-blue-50"
+                      >
+                        <span className="truncate pr-2">{attachment.originalFileName}</span>
+                        <span className="text-xs text-gray-500 whitespace-nowrap">{formatFileSize(attachment.fileSizeBytes)}</span>
+                      </a>
+                    ))}
+                  </div>
                 )}
               </div>
 
