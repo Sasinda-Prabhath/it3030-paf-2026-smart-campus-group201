@@ -217,12 +217,42 @@ const AddResourceModal = ({
   onSubmit,
 }) => {
   const [form, setForm] = useState(initialForm);
+  const [nameError, setNameError] = useState('');
+  const [capacityError, setCapacityError] = useState('');
   const isFacility = resourceType === 'FACILITY';
   const statusOptions = isFacility ? FACILITY_STATUSES : ASSET_STATUSES;
   const locationOptions = isFacility ? FACILITY_LOCATION_OPTIONS : ASSET_LOCATION_OPTIONS;
   const today = new Date().toISOString().split('T')[0];
   const availabilityFromParts = getTimeParts(form.availabilityFrom, TIME_TO_HOUR_OPTIONS);
   const availabilityToParts = getTimeParts(form.availabilityTo, TIME_TO_HOUR_OPTIONS);
+
+  const validateName = (value) => {
+    if (!value) {
+      return '';
+    }
+
+    if (/^\d+$/.test(value)) {
+      return 'Name cannot be numbers only. It must contain letters.';
+    }
+
+    if (!/^[A-Z]/.test(value)) {
+      return 'Name must start with a capital letter.';
+    }
+
+    return '';
+  };
+
+  const validateCapacity = (value) => {
+    if (value === '' || value === null || value === undefined) {
+      return '';
+    }
+
+    if (Number(value) < 1) {
+      return 'Value cannot be less than 1.';
+    }
+
+    return '';
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -235,6 +265,8 @@ const AddResourceModal = ({
         status: initialValues?.status || statusOptions[0],
         ...parsedWindow,
       });
+      setNameError('');
+      setCapacityError('');
     }
   }, [initialValues, isOpen, locationOptions, statusOptions, typeOptions]);
 
@@ -244,6 +276,15 @@ const AddResourceModal = ({
 
   const submit = async (event) => {
     event.preventDefault();
+
+    const currentNameError = validateName(form.name);
+    const currentCapacityError = validateCapacity(form.capacity);
+    setNameError(currentNameError);
+    setCapacityError(currentCapacityError);
+
+    if (currentNameError || currentCapacityError) {
+      return;
+    }
 
     if (isFacility && ['ACTIVE', 'AVAILABLE'].includes(form.status)) {
       if (!form.availableFromDate || !form.availableToDate) {
@@ -299,16 +340,23 @@ const AddResourceModal = ({
         </div>
 
         <form onSubmit={submit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="flex flex-col gap-2 text-sm text-slate-700">
+          <div className="flex flex-col gap-2 text-sm text-slate-700">
             {resourceType === 'FACILITY' ? 'Facility Name' : 'Asset Name'}: *
             <input
               required
               placeholder={resourceType === 'FACILITY' ? 'Enter facility name' : 'Enter asset name'}
               value={form.name}
-              onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-              className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(event) => {
+                const value = event.target.value;
+                setForm((prev) => ({ ...prev, name: value }));
+                setNameError(validateName(value));
+              }}
+              className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                nameError ? 'border-red-500 focus:ring-red-400' : 'border-slate-300 focus:ring-blue-500'
+              }`}
             />
-          </label>
+            {nameError && <p className="text-xs text-red-600 mt-0.5">{nameError}</p>}
+          </div>
 
           <label className="flex flex-col gap-2 text-sm text-slate-700">
             Type: *
@@ -326,7 +374,7 @@ const AddResourceModal = ({
             </select>
           </label>
 
-          <label className="flex flex-col gap-2 text-sm text-slate-700">
+          <div className="flex flex-col gap-2 text-sm text-slate-700">
             {isFacility ? 'Seating Capacity' : 'Available Amount'}: *
             <input
               required
@@ -334,10 +382,17 @@ const AddResourceModal = ({
               type="number"
               placeholder={isFacility ? 'Enter seating capacity' : 'Enter available amount'}
               value={form.capacity}
-              onChange={(event) => setForm((prev) => ({ ...prev, capacity: event.target.value }))}
-              className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(event) => {
+                const value = event.target.value;
+                setForm((prev) => ({ ...prev, capacity: value }));
+                setCapacityError(validateCapacity(value));
+              }}
+              className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                capacityError ? 'border-red-500 focus:ring-red-400' : 'border-slate-300 focus:ring-blue-500'
+              }`}
             />
-          </label>
+            {capacityError && <p className="text-xs text-red-600 mt-0.5">{capacityError}</p>}
+          </div>
 
           <label className="flex flex-col gap-2 text-sm text-slate-700">
             Location: *
