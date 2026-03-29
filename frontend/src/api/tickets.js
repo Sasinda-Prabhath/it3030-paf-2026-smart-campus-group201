@@ -13,6 +13,14 @@ const normalizeTicket = (ticket) => ({
   assignedToName: ticket.assignedToName || '',
   createdAt: ticket.createdAt || '',
   updatedAt: ticket.updatedAt || '',
+  firstResponseAt: ticket.firstResponseAt || '',
+  resolvedAt: ticket.resolvedAt || '',
+  timeToFirstResponseMinutes: Number.isFinite(ticket.timeToFirstResponseMinutes)
+    ? ticket.timeToFirstResponseMinutes
+    : null,
+  timeToResolutionMinutes: Number.isFinite(ticket.timeToResolutionMinutes)
+    ? ticket.timeToResolutionMinutes
+    : null,
 });
 
 const normalizeComment = (comment) => ({

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ticketsApi } from '../api/tickets';
+import ServiceLevelTimer from './ServiceLevelTimer';
 
 const STATUS_OPTIONS = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'];
 const STATUS_BADGE_CLASS = {
@@ -196,6 +197,8 @@ const TechnicianTicketPanel = () => {
             </div>
             <p className="text-sm text-gray-600 mt-1">{selectedTicket.description}</p>
             <p className="text-sm text-gray-600">Location: {selectedTicket.location}</p>
+
+            <ServiceLevelTimer ticket={selectedTicket} />
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>

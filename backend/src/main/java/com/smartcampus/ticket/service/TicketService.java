@@ -37,6 +37,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -193,7 +194,10 @@ public class TicketService {
         User currentUser = getCurrentUser();
         Ticket ticket = getAssignedTicketForTechnician(ticketId, currentUser);
 
-        ticket.setStatus(parseStatus(dto.getStatus()));
+        TicketStatus nextStatus = parseStatus(dto.getStatus());
+        setFirstResponseIfNeeded(ticket, currentUser);
+        updateResolvedTimestamp(ticket, nextStatus);
+        ticket.setStatus(nextStatus);
         ticket.setUpdatedAt(LocalDateTime.now());
 
         return mapTicket(ticketRepository.save(ticket));
@@ -204,7 +208,10 @@ public class TicketService {
         ensureAdmin(currentUser);
 
         Ticket ticket = getTicketOrThrow(ticketId);
-        ticket.setStatus(parseStatus(dto.getStatus()));
+        TicketStatus nextStatus = parseStatus(dto.getStatus());
+        setFirstResponseIfNeeded(ticket, currentUser);
+        updateResolvedTimestamp(ticket, nextStatus);
+        ticket.setStatus(nextStatus);
         ticket.setUpdatedAt(LocalDateTime.now());
 
         return mapTicket(ticketRepository.save(ticket));
@@ -340,6 +347,7 @@ public class TicketService {
         comment.setComment(dto.getComment().trim());
         comment.setCreatedAt(LocalDateTime.now());
 
+        setFirstResponseIfNeeded(ticket, currentUser);
         ticket.setUpdatedAt(LocalDateTime.now());
         ticketRepository.save(ticket);
 
@@ -461,6 +469,7 @@ public class TicketService {
     }
 
     private void copyTicket(TicketDto dto, Ticket ticket) {
+        LocalDateTime now = LocalDateTime.now();
         dto.setId(ticket.getId());
         dto.setTitle(ticket.getTitle());
         dto.setDescription(ticket.getDescription());
@@ -472,6 +481,43 @@ public class TicketService {
         dto.setAssignedToName(ticket.getAssignedToName() == null ? "" : ticket.getAssignedToName());
         dto.setCreatedAt(ticket.getCreatedAt() != null ? ticket.getCreatedAt().toString() : "");
         dto.setUpdatedAt(ticket.getUpdatedAt() != null ? ticket.getUpdatedAt().toString() : "");
+        dto.setFirstResponseAt(ticket.getFirstResponseAt() != null ? ticket.getFirstResponseAt().toString() : "");
+        dto.setResolvedAt(ticket.getResolvedAt() != null ? ticket.getResolvedAt().toString() : "");
+        dto.setTimeToFirstResponseMinutes(calculateDurationMinutes(ticket.getCreatedAt(), ticket.getFirstResponseAt(), now));
+        dto.setTimeToResolutionMinutes(calculateDurationMinutes(ticket.getCreatedAt(), ticket.getResolvedAt(), now));
+    }
+
+    private void setFirstResponseIfNeeded(Ticket ticket, User actor) {
+        if (ticket.getFirstResponseAt() != null) {
+            return;
+        }
+
+        String actorEmail = actor.getEmail() == null ? "" : actor.getEmail().trim();
+        String requesterEmail = ticket.getCreatedByEmail() == null ? "" : ticket.getCreatedByEmail().trim();
+        if (!actorEmail.isBlank() && !requesterEmail.isBlank() && !actorEmail.equalsIgnoreCase(requesterEmail)) {
+            ticket.setFirstResponseAt(LocalDateTime.now());
+        }
+    }
+
+    private void updateResolvedTimestamp(Ticket ticket, TicketStatus nextStatus) {
+        if (nextStatus == TicketStatus.RESOLVED || nextStatus == TicketStatus.CLOSED) {
+            if (ticket.getResolvedAt() == null) {
+                ticket.setResolvedAt(LocalDateTime.now());
+            }
+            return;
+        }
+
+        ticket.setResolvedAt(null);
+    }
+
+    private Long calculateDurationMinutes(LocalDateTime start, LocalDateTime end, LocalDateTime now) {
+        if (start == null) {
+            return null;
+        }
+
+        LocalDateTime effectiveEnd = end != null ? end : now;
+        long minutes = ChronoUnit.MINUTES.between(start, effectiveEnd);
+        return Math.max(0, minutes);
     }
 
     private TicketCommentDto mapComment(TicketComment comment) {

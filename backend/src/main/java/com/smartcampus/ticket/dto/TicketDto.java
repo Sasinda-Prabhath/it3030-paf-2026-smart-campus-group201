@@ -13,6 +13,10 @@ public class TicketDto {
     private String assignedToName;
     private String createdAt;
     private String updatedAt;
+    private String firstResponseAt;
+    private String resolvedAt;
+    private Long timeToFirstResponseMinutes;
+    private Long timeToResolutionMinutes;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -46,4 +50,16 @@ public class TicketDto {
 
     public String getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getFirstResponseAt() { return firstResponseAt; }
+    public void setFirstResponseAt(String firstResponseAt) { this.firstResponseAt = firstResponseAt; }
+
+    public String getResolvedAt() { return resolvedAt; }
+    public void setResolvedAt(String resolvedAt) { this.resolvedAt = resolvedAt; }
+
+    public Long getTimeToFirstResponseMinutes() { return timeToFirstResponseMinutes; }
+    public void setTimeToFirstResponseMinutes(Long timeToFirstResponseMinutes) { this.timeToFirstResponseMinutes = timeToFirstResponseMinutes; }
+
+    public Long getTimeToResolutionMinutes() { return timeToResolutionMinutes; }
+    public void setTimeToResolutionMinutes(Long timeToResolutionMinutes) { this.timeToResolutionMinutes = timeToResolutionMinutes; }
 }

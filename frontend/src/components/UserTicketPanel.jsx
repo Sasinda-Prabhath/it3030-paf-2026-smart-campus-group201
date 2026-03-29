@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ticketsApi } from '../api/tickets';
+import ServiceLevelTimer from './ServiceLevelTimer';
 
 const STATUS_BADGE_CLASS = {
   OPEN: 'bg-amber-100 text-amber-800 border border-amber-200',
@@ -347,6 +348,8 @@ const UserTicketPanel = () => {
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm min-h-[80px]"
                 />
               </form>
+
+              <ServiceLevelTimer ticket={selectedTicket} />
 
               <div className="mt-4 space-y-2 max-h-64 overflow-y-auto pr-1">
                 {(selectedTicket.comments || []).length === 0 ? (
