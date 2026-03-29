@@ -681,6 +681,20 @@ const ResourceCatalogPage = () => {
 
   useEffect(() => {
     loadCatalog();
+  }, [user?.role]);
+
+  useEffect(() => {
+    const refreshCatalog = () => {
+      loadCatalog();
+    };
+
+    window.addEventListener('focus', refreshCatalog);
+    window.addEventListener('storage', refreshCatalog);
+
+    return () => {
+      window.removeEventListener('focus', refreshCatalog);
+      window.removeEventListener('storage', refreshCatalog);
+    };
   }, []);
 
   useEffect(() => {
