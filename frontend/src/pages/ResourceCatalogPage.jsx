@@ -30,6 +30,10 @@ const initialForm = {
   capacity: '',
   location: '',
   availabilityWindow: '',
+  availableFromDate: '',
+  availableToDate: '',
+  unavailableFromDate: '',
+  unavailableToDate: '',
   availabilityFrom: '08:00',
   availabilityTo: '18:00',
   status: 'ACTIVE',
@@ -70,6 +74,19 @@ const parseAvailabilityWindow = (availabilityWindow) => {
   return { availabilityFrom: '08:00', availabilityTo: '18:00' };
 };
 
+const formatDateLabel = (value) => {
+  if (!value) {
+    return '-';
+  }
+
+  const parsedDate = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return value;
+  }
+
+  return parsedDate.toLocaleDateString();
+};
+
 const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDelete, onBook }) => (
   <article className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
     <div className={`px-3 py-2 text-white ${accentClass}`}>
@@ -98,6 +115,18 @@ const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDel
       {resource.availabilityWindow && (
         <p className="leading-snug">
           <span className="font-medium text-slate-800">Availability:</span> {resource.availabilityWindow}
+        </p>
+      )}
+
+      {(resource.availableFromDate || resource.availableToDate) && (
+        <p className="leading-snug">
+          <span className="font-medium text-slate-800">Available Dates:</span> {formatDateLabel(resource.availableFromDate)} to {formatDateLabel(resource.availableToDate)}
+        </p>
+      )}
+
+      {(resource.unavailableFromDate || resource.unavailableToDate) && (
+        <p className="leading-snug">
+          <span className="font-medium text-slate-800">Unavailable Dates:</span> {formatDateLabel(resource.unavailableFromDate)} to {formatDateLabel(resource.unavailableToDate)}
         </p>
       )}
 
@@ -149,6 +178,7 @@ const AddResourceModal = ({
   const isFacility = resourceType === 'FACILITY';
   const statusOptions = isFacility ? FACILITY_STATUSES : ASSET_STATUSES;
   const locationOptions = isFacility ? FACILITY_LOCATION_OPTIONS : ASSET_LOCATION_OPTIONS;
+  const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     if (isOpen) {
@@ -170,9 +200,41 @@ const AddResourceModal = ({
 
   const submit = async (event) => {
     event.preventDefault();
+
+    if (isFacility && ['ACTIVE', 'AVAILABLE'].includes(form.status)) {
+      if (!form.availableFromDate || !form.availableToDate) {
+        window.alert('Please select Available From Date and Available To Date.');
+        return;
+      }
+
+      if (form.availableToDate < form.availableFromDate) {
+        window.alert('Available To Date cannot be before Available From Date.');
+        return;
+      }
+    }
+
+    if (isFacility && ['OUT_OF_SERVICE', 'OUT_OF_STOCK'].includes(form.status)) {
+      if (!form.unavailableFromDate || !form.unavailableToDate) {
+        window.alert('Please select Unavailable From and Unavailable To dates.');
+        return;
+      }
+
+      if (form.unavailableToDate < form.unavailableFromDate) {
+        window.alert('Unavailable To cannot be before Unavailable From.');
+        return;
+      }
+    }
+
+    const shouldUseAvailableDates = isFacility && ['ACTIVE', 'AVAILABLE'].includes(form.status);
+    const shouldUseUnavailableDates = isFacility && ['OUT_OF_SERVICE', 'OUT_OF_STOCK'].includes(form.status);
+
     const payload = {
       ...form,
       availabilityWindow: isFacility ? `${form.availabilityFrom} - ${form.availabilityTo}` : '',
+      availableFromDate: shouldUseAvailableDates ? form.availableFromDate : '',
+      availableToDate: shouldUseAvailableDates ? form.availableToDate : '',
+      unavailableFromDate: shouldUseUnavailableDates ? form.unavailableFromDate : '',
+      unavailableToDate: shouldUseUnavailableDates ? form.unavailableToDate : '',
     };
     await onSubmit(payload);
     onClose();
@@ -287,7 +349,17 @@ const AddResourceModal = ({
                     name="status"
                     value={status}
                     checked={form.status === status}
-                    onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}
+                    onChange={(event) => {
+                      const nextStatus = event.target.value;
+                      setForm((prev) => ({
+                        ...prev,
+                        status: nextStatus,
+                        availableFromDate: ['ACTIVE', 'AVAILABLE'].includes(nextStatus) ? prev.availableFromDate : '',
+                        availableToDate: ['ACTIVE', 'AVAILABLE'].includes(nextStatus) ? prev.availableToDate : '',
+                        unavailableFromDate: ['OUT_OF_SERVICE', 'OUT_OF_STOCK'].includes(nextStatus) ? prev.unavailableFromDate : '',
+                        unavailableToDate: ['OUT_OF_SERVICE', 'OUT_OF_STOCK'].includes(nextStatus) ? prev.unavailableToDate : '',
+                      }));
+                    }}
                     className="accent-blue-600"
                   />
                   {formatEnumLabel(status)}
@@ -295,6 +367,62 @@ const AddResourceModal = ({
               ))}
             </div>
           </div>
+
+          {isFacility && ['ACTIVE', 'AVAILABLE'].includes(form.status) && (
+            <>
+              <label className="flex flex-col gap-2 text-sm text-slate-700">
+                Available From Date: *
+                <input
+                  required
+                  type="date"
+                  min={today}
+                  value={form.availableFromDate}
+                  onChange={(event) => setForm((prev) => ({ ...prev, availableFromDate: event.target.value }))}
+                  className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </label>
+
+              <label className="flex flex-col gap-2 text-sm text-slate-700">
+                Available To Date: *
+                <input
+                  required
+                  type="date"
+                  min={form.availableFromDate || today}
+                  value={form.availableToDate}
+                  onChange={(event) => setForm((prev) => ({ ...prev, availableToDate: event.target.value }))}
+                  className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </label>
+            </>
+          )}
+
+          {isFacility && ['OUT_OF_SERVICE', 'OUT_OF_STOCK'].includes(form.status) && (
+            <>
+              <label className="flex flex-col gap-2 text-sm text-slate-700">
+                Unavailable From: *
+                <input
+                  required
+                  type="date"
+                  min={today}
+                  value={form.unavailableFromDate}
+                  onChange={(event) => setForm((prev) => ({ ...prev, unavailableFromDate: event.target.value }))}
+                  className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </label>
+
+              <label className="flex flex-col gap-2 text-sm text-slate-700">
+                Unavailable To: *
+                <input
+                  required
+                  type="date"
+                  min={form.unavailableFromDate || today}
+                  value={form.unavailableToDate}
+                  onChange={(event) => setForm((prev) => ({ ...prev, unavailableToDate: event.target.value }))}
+                  className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </label>
+            </>
+          )}
 
           <div className="md:col-span-2 flex justify-end gap-3 pt-2">
             <button
