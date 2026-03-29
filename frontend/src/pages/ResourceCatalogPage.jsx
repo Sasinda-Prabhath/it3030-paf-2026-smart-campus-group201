@@ -445,7 +445,7 @@ const AddResourceModal = ({
 
           {isFacility && (
             <label className="flex flex-col gap-2 text-sm text-slate-700 md:col-span-2">
-              Availability Window
+              {['OUT_OF_SERVICE', 'OUT_OF_STOCK'].includes(form.status) ? 'Unavailability Window' : 'Availability Window'}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1 text-xs text-slate-500">
                   From
