@@ -231,6 +231,10 @@ const AddResourceModal = ({
       return '';
     }
 
+    if (value.length > 5) {
+      return 'Name cannot exceed 5 characters.';
+    }
+
     if (/^\d+$/.test(value)) {
       return 'Name cannot be numbers only. It must contain letters.';
     }
