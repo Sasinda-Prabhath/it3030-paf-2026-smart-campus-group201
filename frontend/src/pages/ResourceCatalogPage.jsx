@@ -99,12 +99,13 @@ const formatTimeLabel = (value) => {
     return value;
   }
 
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  const meridiem = hours >= 12 ? 'PM' : 'AM';
+  return `${hours}.${String(minutes).padStart(2, '0')} ${meridiem}`;
 };
 
 const formatAvailabilityWindow = (availabilityWindow) => {
   const { availabilityFrom, availabilityTo } = parseAvailabilityWindow(availabilityWindow);
-  return `from ${formatTimeLabel(availabilityFrom)} to ${formatTimeLabel(availabilityTo)}`;
+  return `From ${formatTimeLabel(availabilityFrom)} To ${formatTimeLabel(availabilityTo)}`;
 };
 
 const formatDateLabel = (value) => {
@@ -147,19 +148,19 @@ const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDel
       </p>
       {resource.availabilityWindow && (
         <p className="leading-snug">
-          <span className="font-medium text-slate-800">Availability:</span> {formatAvailabilityWindow(resource.availabilityWindow)}
+          <span className="font-medium text-slate-800">Availability Time:</span> {formatAvailabilityWindow(resource.availabilityWindow)}
         </p>
       )}
 
       {(resource.availableFromDate || resource.availableToDate) && (
         <p className="leading-snug">
-          <span className="font-medium text-slate-800">Available Dates:</span> from {formatDateLabel(resource.availableFromDate)} to {formatDateLabel(resource.availableToDate)}
+          <span className="font-medium text-slate-800">Available Dates:</span> From {formatDateLabel(resource.availableFromDate)} To {formatDateLabel(resource.availableToDate)}
         </p>
       )}
 
       {(resource.unavailableFromDate || resource.unavailableToDate) && (
         <p className="leading-snug">
-          <span className="font-medium text-slate-800">Unavailable Dates:</span> from {formatDateLabel(resource.unavailableFromDate)} to {formatDateLabel(resource.unavailableToDate)}
+          <span className="font-medium text-slate-800">Unavailable Dates:</span> From {formatDateLabel(resource.unavailableFromDate)} To {formatDateLabel(resource.unavailableToDate)}
         </p>
       )}
 
@@ -265,7 +266,7 @@ const AddResourceModal = ({
 
     const payload = {
       ...form,
-      availabilityWindow: isFacility ? `from ${formatTimeLabel(form.availabilityFrom)} to ${formatTimeLabel(form.availabilityTo)}` : '',
+      availabilityWindow: isFacility ? `${form.availabilityFrom} - ${form.availabilityTo}` : '',
       availableFromDate: shouldUseAvailableDates ? form.availableFromDate : '',
       availableToDate: shouldUseAvailableDates ? form.availableToDate : '',
       unavailableFromDate: shouldUseUnavailableDates ? form.unavailableFromDate : '',
