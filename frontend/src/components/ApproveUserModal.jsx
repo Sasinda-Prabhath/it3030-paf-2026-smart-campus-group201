@@ -19,7 +19,8 @@ const ApproveUserModal = ({ user, isOpen, onClose, onSuccess }) => {
       onSuccess();
       resetForm();
     } catch (err) {
-      setError('Failed to approve user. Please try again.');
+      const backendMessage = err?.response?.data?.message;
+      setError(backendMessage || 'Failed to approve user. Please try again.');
       console.error(err);
     } finally {
       setLoading(false);

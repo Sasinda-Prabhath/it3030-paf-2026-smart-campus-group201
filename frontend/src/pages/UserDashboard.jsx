@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { bookingRequestsApi } from '../api/bookingRequests';
 import BookingRequestModal from '../components/BookingRequestModal';
+import UserTicketPanel from '../components/UserTicketPanel';
 
 const FACILITY_TYPES = ['LECTURE_HALL', 'MEETING_ROOM', 'LAB'];
 
@@ -245,13 +246,7 @@ const UserDashboard = () => {
           )}
 
           {activeTab === 'tickets' && (
-            <div className="bg-white rounded-lg shadow p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">🎫 Support Tickets</h2>
-              <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-600">
-                <p className="text-lg">Ticket management feature - coming soon</p>
-                <p className="text-sm mt-2">Create and track support tickets</p>
-              </div>
-            </div>
+            <UserTicketPanel />
           )}
         </div>
       </div>
