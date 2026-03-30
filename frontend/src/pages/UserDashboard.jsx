@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { bookingRequestsApi } from '../api/bookingRequests';
 import BookingRequestModal from '../components/BookingRequestModal';
+import UserTicketPanel from '../components/UserTicketPanel';
 
 const FACILITY_TYPES = ['LECTURE_HALL', 'MEETING_ROOM', 'LAB'];
 
@@ -54,9 +55,13 @@ const UserDashboard = () => {
       return;
     }
 
-    await bookingRequestsApi.update(bookingModalState.request.id, formData);
-    await loadMyBookings();
-    window.alert('Booking request updated successfully.');
+    try {
+      await bookingRequestsApi.update(bookingModalState.request.id, formData);
+      await loadMyBookings();
+      window.alert('Booking request updated successfully.');
+    } catch (err) {
+      window.alert(err.response?.data?.message || 'Failed to update booking request due to a scheduling conflict or server error.');
+    }
   };
 
   const deleteBookingRequest = async (requestId) => {
@@ -67,6 +72,20 @@ const UserDashboard = () => {
     await bookingRequestsApi.delete(requestId);
     await loadMyBookings();
     window.alert('Booking request deleted successfully.');
+  };
+
+  const cancelBookingRequest = async (requestId) => {
+    if (!window.confirm('Are you sure you want to cancel this approved booking?')) {
+      return;
+    }
+
+    try {
+      await bookingRequestsApi.cancel(requestId);
+      await loadMyBookings();
+      window.alert('Booking request cancelled successfully.');
+    } catch (err) {
+      window.alert('Failed to cancel booking request. ' + (err.response?.data?.message || ''));
+    }
   };
 
   const tabs = [
@@ -202,6 +221,7 @@ const UserDashboard = () => {
                         <span className={`px-2 py-0.5 text-xs rounded-full font-semibold ${
                           request.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
                           request.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
+                          request.status === 'CANCELLED' ? 'bg-gray-100 text-gray-800' :
                           'bg-yellow-100 text-yellow-800'
                         }`}>
                           {request.status}
@@ -236,6 +256,17 @@ const UserDashboard = () => {
                             </button>
                           </div>
                         )}
+                        {request.status === 'APPROVED' && (
+                          <div className="pt-2 flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => cancelBookingRequest(request.id)}
+                              className="px-3 py-1 text-xs rounded-md bg-orange-600 text-white hover:bg-orange-700"
+                            >
+                              Cancel Booking
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -245,13 +276,7 @@ const UserDashboard = () => {
           )}
 
           {activeTab === 'tickets' && (
-            <div className="bg-white rounded-lg shadow p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">🎫 Support Tickets</h2>
-              <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-600">
-                <p className="text-lg">Ticket management feature - coming soon</p>
-                <p className="text-sm mt-2">Create and track support tickets</p>
-              </div>
-            </div>
+            <UserTicketPanel />
           )}
         </div>
       </div>

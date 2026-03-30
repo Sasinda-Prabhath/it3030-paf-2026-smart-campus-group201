@@ -15,6 +15,10 @@ const NotificationBell = ({ onClick }) => {
       const response = await notificationApi.getUnreadCount();
       setUnreadCount(response.data);
     } catch (error) {
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        setUnreadCount(0);
+        return;
+      }
       console.error('Failed to load unread count', error);
     }
   };

@@ -3,6 +3,7 @@ import { useAuth } from '../features/auth/AuthContext';
 import { Link } from 'react-router-dom';
 import { adminApi } from '../api/admin';
 import { bookingRequestsApi } from '../api/bookingRequests';
+import AdminTicketPanel from '../components/AdminTicketPanel';
 
 const FACILITY_TYPES = ['LECTURE_HALL', 'MEETING_ROOM', 'LAB'];
 
@@ -260,6 +261,14 @@ const AdminDashboard = () => {
               );
             })}
           </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow mb-8 p-6">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">🎫 Ticket Operations</h2>
+            <p className="text-gray-600 text-sm mt-1">Assign tickets, review all tickets, and update or close tickets.</p>
+          </div>
+          <AdminTicketPanel />
         </div>
 
         {/* System Features Grid */}

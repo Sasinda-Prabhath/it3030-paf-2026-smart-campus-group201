@@ -17,7 +17,7 @@ import AdminBookingRequestsPage from '../pages/AdminBookingRequestsPage';
 
 const AppRoutes = () => {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -60,7 +60,7 @@ const AppRoutes = () => {
           <Route
             path="/dashboard"
             element={
-              <RoleGuard allowedRoles={['USER']}>
+              <RoleGuard allowedRoles={['USER', 'ADMIN']}>
                 <MainLayout><UserDashboard /></MainLayout>
               </RoleGuard>
             }

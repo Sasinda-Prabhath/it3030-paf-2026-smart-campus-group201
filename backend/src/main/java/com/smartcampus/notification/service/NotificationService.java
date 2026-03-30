@@ -25,7 +25,7 @@ public class NotificationService {
 
     public List<NotificationDto> getMyNotifications() {
         String email = currentUserService.getCurrentUserEmail();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        var user = userRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new RuntimeException("User not found"));
 
         return notificationRepository.findByUserOrderByCreatedAtDesc(user)
             .stream()
@@ -35,14 +35,14 @@ public class NotificationService {
 
     public int getUnreadCount() {
         String email = currentUserService.getCurrentUserEmail();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        var user = userRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new RuntimeException("User not found"));
 
         return notificationRepository.countByUserAndIsReadFalse(user);
     }
 
     public NotificationDto markAsRead(@NonNull Long id) {
         String email = currentUserService.getCurrentUserEmail();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        var user = userRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new RuntimeException("User not found"));
 
         Notification notification = notificationRepository.findById(id)
             .filter(n -> n.getUser().equals(user))
@@ -55,7 +55,7 @@ public class NotificationService {
 
     public void markAllAsRead() {
         String email = currentUserService.getCurrentUserEmail();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        var user = userRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Notification> unread = notificationRepository.findByUserAndIsReadFalse(user);
         unread.forEach(n -> n.setIsRead(true));
@@ -64,7 +64,7 @@ public class NotificationService {
 
     public void deleteNotification(@NonNull Long id) {
         String email = currentUserService.getCurrentUserEmail();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        var user = userRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new RuntimeException("User not found"));
 
         @SuppressWarnings("null")
         Notification notification = notificationRepository.findById(id)

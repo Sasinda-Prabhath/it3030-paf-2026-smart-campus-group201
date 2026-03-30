@@ -1,4 +1,11 @@
+server:
+  port: 9090
+  error:
+    include-message: always
+
 spring:
+  profiles:
+    include: secrets
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/smart-campus-new}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
