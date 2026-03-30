@@ -2,8 +2,10 @@ package com.smartcampus.notification.service;
 
 import com.smartcampus.notification.dto.NotificationDto;
 import com.smartcampus.notification.entity.Notification;
+import com.smartcampus.notification.entity.NotificationType;
 import com.smartcampus.notification.repository.NotificationRepository;
 import com.smartcampus.common.security.CurrentUserService;
+import com.smartcampus.user.entity.User;
 import com.smartcampus.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -72,6 +74,11 @@ public class NotificationService {
             .orElseThrow(() -> new RuntimeException("Notification not found"));
 
         notificationRepository.delete(notification);
+    }
+
+    public void createNotification(@NonNull User user, @NonNull String title, @NonNull String message, @NonNull NotificationType type) {
+        Notification notification = new Notification(user, title, message, type);
+        notificationRepository.save(notification);
     }
 
     private NotificationDto mapToDto(Notification notification) {

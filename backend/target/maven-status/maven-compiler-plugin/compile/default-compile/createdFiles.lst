@@ -4,7 +4,6 @@ com\smartcampus\common\exception\GlobalExceptionHandler.class
 com\smartcampus\ticket\repository\TicketRepository.class
 com\smartcampus\ticket\repository\TicketCommentRepository.class
 com\smartcampus\ticket\repository\TicketAttachmentRepository.class
-META-INF\spring-configuration-metadata.json
 com\smartcampus\ticket\entity\TicketAttachment.class
 com\smartcampus\user\dto\UpdateRoleDto.class
 com\smartcampus\resource\controller\ResourceCatalogController.class
@@ -52,6 +51,7 @@ com\smartcampus\ticket\dto\UpdateTicketDto.class
 com\smartcampus\user\dto\UpdateProfileDto.class
 com\smartcampus\booking\repository\BookingRequestRepository.class
 com\smartcampus\common\security\GoogleOAuth2Config.class
+com\smartcampus\user\entity\StaffType.class
 com\smartcampus\booking\controller\AdminBookingRequestController.class
 com\smartcampus\resource\dto\ResourceItemDto.class
 com\smartcampus\ticket\entity\TicketStatus.class
