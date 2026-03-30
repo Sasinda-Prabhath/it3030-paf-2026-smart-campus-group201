@@ -23,8 +23,6 @@ public class SecurityConfig {
 
     @Autowired(required = false)
     private ClientRegistrationRepository clientRegistrationRepository;
-    @Autowired
-    private OAuth2LoginSuccessHandler oauth2LoginSuccessHandler;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -48,7 +46,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/staff/**").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers("/api/staff/**").hasAnyRole("ADMIN", "MANAGER", "TECHNICIAN", "STAFF")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
@@ -62,7 +60,7 @@ public class SecurityConfig {
         // Only configure OAuth2 if both handler and repository are available
         if (oauth2LoginSuccessHandler != null && clientRegistrationRepository != null) {
             http.oauth2Login(oauth2 -> oauth2
-                .loginPage("/login")
+                .loginPage("/oauth2/authorization/google")
                 .successHandler(oauth2LoginSuccessHandler)
                 .failureUrl("/login?error")
             );
@@ -73,19 +71,6 @@ public class SecurityConfig {
             .invalidateHttpSession(true)
             .clearAuthentication(true)
         );
-                .requestMatchers("/api/staff/**").hasAnyRole("ADMIN", "MANAGER", "TECHNICIAN")
-                .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .loginPage("/oauth2/authorization/google")
-                .successHandler(oauth2LoginSuccessHandler)
-                .failureUrl("/login?error")
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-            );
 
         return http.build();
     }

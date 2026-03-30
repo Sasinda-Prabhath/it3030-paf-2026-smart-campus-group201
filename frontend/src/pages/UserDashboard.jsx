@@ -54,9 +54,13 @@ const UserDashboard = () => {
       return;
     }
 
-    await bookingRequestsApi.update(bookingModalState.request.id, formData);
-    await loadMyBookings();
-    window.alert('Booking request updated successfully.');
+    try {
+      await bookingRequestsApi.update(bookingModalState.request.id, formData);
+      await loadMyBookings();
+      window.alert('Booking request updated successfully.');
+    } catch (err) {
+      window.alert(err.response?.data?.message || 'Failed to update booking request due to a scheduling conflict or server error.');
+    }
   };
 
   const deleteBookingRequest = async (requestId) => {
@@ -67,6 +71,20 @@ const UserDashboard = () => {
     await bookingRequestsApi.delete(requestId);
     await loadMyBookings();
     window.alert('Booking request deleted successfully.');
+  };
+
+  const cancelBookingRequest = async (requestId) => {
+    if (!window.confirm('Are you sure you want to cancel this approved booking?')) {
+      return;
+    }
+
+    try {
+      await bookingRequestsApi.cancel(requestId);
+      await loadMyBookings();
+      window.alert('Booking request cancelled successfully.');
+    } catch (err) {
+      window.alert('Failed to cancel booking request. ' + (err.response?.data?.message || ''));
+    }
   };
 
   const tabs = [
@@ -202,6 +220,7 @@ const UserDashboard = () => {
                         <span className={`px-2 py-0.5 text-xs rounded-full font-semibold ${
                           request.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
                           request.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
+                          request.status === 'CANCELLED' ? 'bg-gray-100 text-gray-800' :
                           'bg-yellow-100 text-yellow-800'
                         }`}>
                           {request.status}
@@ -233,6 +252,17 @@ const UserDashboard = () => {
                               className="px-3 py-1 text-xs rounded-md bg-red-600 text-white hover:bg-red-700"
                             >
                               Delete Request
+                            </button>
+                          </div>
+                        )}
+                        {request.status === 'APPROVED' && (
+                          <div className="pt-2 flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => cancelBookingRequest(request.id)}
+                              className="px-3 py-1 text-xs rounded-md bg-orange-600 text-white hover:bg-orange-700"
+                            >
+                              Cancel Booking
                             </button>
                           </div>
                         )}
