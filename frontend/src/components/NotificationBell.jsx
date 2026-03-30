@@ -24,7 +24,7 @@ const NotificationBell = ({ onClick }) => {
   };
 
   return (
-    <button onClick={onClick} className="relative p-2 text-white hover:text-gray-300">
+    <button onClick={onClick} className="relative p-2 text-yellow-400 hover:text-yellow-300 transition-colors">
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5-5V7a3 3 0 00-6 0v5l-5 5h5m0 0v1a3 3 0 006 0v-1m-6 0h6" />
       </svg>
