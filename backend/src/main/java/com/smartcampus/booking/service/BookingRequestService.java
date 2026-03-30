@@ -43,6 +43,8 @@ public class BookingRequestService {
     public BookingRequestDto create(@NonNull CreateBookingRequestDto dto) {
         User currentUser = getCurrentUser();
 
+        checkSchedulingConflicts(dto.getResourceId(), dto.getBookingDate(), dto.getTimeRange(), null);
+
         BookingRequest request = new BookingRequest();
         request.setResourceId(dto.getResourceId());
         request.setResourceName(dto.getResourceName());
@@ -98,6 +100,8 @@ public class BookingRequestService {
         User currentUser = getCurrentUser();
         BookingRequest request = getOwnedPendingRequest(id, currentUser);
 
+        checkSchedulingConflicts(request.getResourceId(), dto.getBookingDate(), dto.getTimeRange(), id);
+
         request.setBookingDate(dto.getBookingDate());
         request.setTimeRange(normalizeText(dto.getTimeRange()));
         request.setPurpose(dto.getPurpose().trim());
@@ -111,6 +115,23 @@ public class BookingRequestService {
         User currentUser = getCurrentUser();
         BookingRequest request = getOwnedPendingRequest(id, currentUser);
         bookingRequestRepository.delete(request);
+    }
+
+    public BookingRequestDto cancel(@NonNull Long id) {
+        User currentUser = getCurrentUser();
+        BookingRequest request = bookingRequestRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Booking request not found"));
+
+        if (!currentUser.getEmail().equalsIgnoreCase(request.getRequesterEmail())) {
+            throw new AccessDeniedException("You can only cancel your own booking requests");
+        }
+
+        if (request.getStatus() != BookingStatus.APPROVED) {
+            throw new IllegalArgumentException("Only approved booking requests can be cancelled");
+        }
+
+        request.setStatus(BookingStatus.CANCELLED);
+        return mapToDto(bookingRequestRepository.save(request));
     }
 
     private User getCurrentUser() {
@@ -162,5 +183,39 @@ public class BookingRequestService {
 
     private String normalizeText(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private void checkSchedulingConflicts(String resourceId, java.time.LocalDate bookingDate, String timeRange, Long excludeRequestId) {
+        if (timeRange == null || timeRange.isBlank()) return;
+
+        List<BookingStatus> activeStatuses = java.util.Arrays.asList(BookingStatus.PENDING, BookingStatus.APPROVED);
+        List<BookingRequest> existingBookings = bookingRequestRepository.findByResourceIdAndBookingDateAndStatusIn(resourceId, bookingDate, activeStatuses);
+
+        for (BookingRequest existing : existingBookings) {
+            if (excludeRequestId != null && existing.getId().equals(excludeRequestId)) {
+                continue;
+            }
+            if (isTimeOverlapping(timeRange, existing.getTimeRange())) {
+                throw new IllegalArgumentException("Scheduling conflict: The resource is already booked for the requested time range.");
+            }
+        }
+    }
+
+    private boolean isTimeOverlapping(String range1, String range2) {
+        if (range1 == null || range2 == null) return false;
+        try {
+            String[] r1 = range1.split("-");
+            String[] r2 = range2.split("-");
+            if (r1.length != 2 || r2.length != 2) return false;
+            
+            java.time.LocalTime start1 = java.time.LocalTime.parse(r1[0].trim());
+            java.time.LocalTime end1 = java.time.LocalTime.parse(r1[1].trim());
+            java.time.LocalTime start2 = java.time.LocalTime.parse(r2[0].trim());
+            java.time.LocalTime end2 = java.time.LocalTime.parse(r2[1].trim());
+            
+            return start1.isBefore(end2) && start2.isBefore(end1);
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

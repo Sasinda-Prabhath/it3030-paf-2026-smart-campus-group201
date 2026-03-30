@@ -828,35 +828,39 @@ const ResourceCatalogPage = () => {
       return;
     }
 
-    if (bookingState.mode === 'EDIT' && bookingState.request?.id) {
-      await bookingRequestsApi.update(bookingState.request.id, {
+    try {
+      if (bookingState.mode === 'EDIT' && bookingState.request?.id) {
+        await bookingRequestsApi.update(bookingState.request.id, {
+          bookingDate: bookingFormData.bookingDate,
+          timeRange: bookingFormData.timeRange,
+          purpose: bookingFormData.purpose,
+          attendees: bookingFormData.attendees,
+          expectedAmount: bookingFormData.expectedAmount,
+        });
+        await loadStudentRequests();
+        window.alert('Booking request updated successfully.');
+        return;
+      }
+
+      await bookingRequestsApi.create({
+        resourceId: bookingState.resource.id,
+        resourceName: bookingState.resource.name,
+        resourceType: bookingState.resource.type,
+        location: bookingState.resource.location,
+        requesterName: user?.fullName || 'Student',
+        requesterEmail: user?.email || '',
         bookingDate: bookingFormData.bookingDate,
         timeRange: bookingFormData.timeRange,
         purpose: bookingFormData.purpose,
         attendees: bookingFormData.attendees,
         expectedAmount: bookingFormData.expectedAmount,
       });
+
       await loadStudentRequests();
-      window.alert('Booking request updated successfully.');
-      return;
+      window.alert('Booking request submitted successfully.');
+    } catch (err) {
+      window.alert(err.response?.data?.message || 'Failed to process booking request due to a scheduling conflict or server error.');
     }
-
-    await bookingRequestsApi.create({
-      resourceId: bookingState.resource.id,
-      resourceName: bookingState.resource.name,
-      resourceType: bookingState.resource.type,
-      location: bookingState.resource.location,
-      requesterName: user?.fullName || 'Student',
-      requesterEmail: user?.email || '',
-      bookingDate: bookingFormData.bookingDate,
-      timeRange: bookingFormData.timeRange,
-      purpose: bookingFormData.purpose,
-      attendees: bookingFormData.attendees,
-      expectedAmount: bookingFormData.expectedAmount,
-    });
-
-    await loadStudentRequests();
-    window.alert('Booking request submitted successfully.');
   };
 
   const deleteBookingRequest = async (requestId) => {
