@@ -8,6 +8,8 @@ import com.smartcampus.booking.entity.BookingRequest;
 import com.smartcampus.booking.entity.BookingStatus;
 import com.smartcampus.booking.repository.BookingRequestRepository;
 import com.smartcampus.common.security.CurrentUserService;
+import com.smartcampus.notification.entity.NotificationType;
+import com.smartcampus.notification.service.NotificationService;
 import com.smartcampus.user.entity.Role;
 import com.smartcampus.user.entity.User;
 import com.smartcampus.user.repository.UserRepository;
@@ -30,6 +32,9 @@ public class BookingRequestService {
 
     @Autowired
     private CurrentUserService currentUserService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     public List<BookingRequestDto> getVisibleRequests() {
         User currentUser = getCurrentUser();
@@ -93,7 +98,30 @@ public class BookingRequestService {
             ? currentUser.getFullName()
             : currentUser.getEmail());
 
-        return mapToDto(bookingRequestRepository.save(request));
+        BookingRequestDto savedRequest = mapToDto(bookingRequestRepository.save(request));
+
+        // Send notification to the requester
+        User requester = userRepository.findByEmailIgnoreCase(request.getRequesterEmail())
+            .orElse(null);
+        if (requester != null) {
+            if (nextStatus == BookingStatus.APPROVED) {
+                notificationService.createNotification(
+                    requester,
+                    "Booking Approved",
+                    "Your booking for " + request.getResourceName() + " on " + request.getBookingDate() + " has been approved.",
+                    NotificationType.BOOKING_APPROVED
+                );
+            } else if (nextStatus == BookingStatus.REJECTED) {
+                notificationService.createNotification(
+                    requester,
+                    "Booking Rejected",
+                    "Your booking for " + request.getResourceName() + " on " + request.getBookingDate() + " has been rejected. Reason: " + request.getAdminReason(),
+                    NotificationType.BOOKING_REJECTED
+                );
+            }
+        }
+
+        return savedRequest;
     }
 
     public BookingRequestDto update(@NonNull Long id, @NonNull UpdateBookingRequestDto dto) {

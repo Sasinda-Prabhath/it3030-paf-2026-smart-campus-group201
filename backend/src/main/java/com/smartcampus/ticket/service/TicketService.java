@@ -1,6 +1,8 @@
 package com.smartcampus.ticket.service;
 
 import com.smartcampus.common.security.CurrentUserService;
+import com.smartcampus.notification.entity.NotificationType;
+import com.smartcampus.notification.service.NotificationService;
 import com.smartcampus.ticket.dto.AddTicketCommentDto;
 import com.smartcampus.ticket.dto.AssignTicketDto;
 import com.smartcampus.ticket.dto.CreateTicketDto;
@@ -60,6 +62,9 @@ public class TicketService {
 
     @Autowired
     private CurrentUserService currentUserService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     private final Path attachmentStoragePath;
 
@@ -195,12 +200,27 @@ public class TicketService {
         Ticket ticket = getAssignedTicketForTechnician(ticketId, currentUser);
 
         TicketStatus nextStatus = parseStatus(dto.getStatus());
+        TicketStatus previousStatus = ticket.getStatus();
         setFirstResponseIfNeeded(ticket, currentUser);
         updateResolvedTimestamp(ticket, nextStatus);
         ticket.setStatus(nextStatus);
         ticket.setUpdatedAt(LocalDateTime.now());
 
-        return mapTicket(ticketRepository.save(ticket));
+        TicketDto savedTicket = mapTicket(ticketRepository.save(ticket));
+
+        // Send notification to ticket creator about status change
+        User creator = userRepository.findByEmailIgnoreCase(ticket.getCreatedByEmail())
+            .orElse(null);
+        if (creator != null) {
+            notificationService.createNotification(
+                creator,
+                "Ticket Status Changed",
+                "Your ticket #" + ticket.getId() + " status has changed from " + previousStatus + " to " + nextStatus,
+                NotificationType.TICKET_STATUS_CHANGED
+            );
+        }
+
+        return savedTicket;
     }
 
     public TicketDto updateTicketStatusForAdmin(@NonNull Long ticketId, @NonNull UpdateTicketStatusDto dto) {
@@ -209,12 +229,41 @@ public class TicketService {
 
         Ticket ticket = getTicketOrThrow(ticketId);
         TicketStatus nextStatus = parseStatus(dto.getStatus());
+        TicketStatus previousStatus = ticket.getStatus();
         setFirstResponseIfNeeded(ticket, currentUser);
         updateResolvedTimestamp(ticket, nextStatus);
         ticket.setStatus(nextStatus);
         ticket.setUpdatedAt(LocalDateTime.now());
 
-        return mapTicket(ticketRepository.save(ticket));
+        TicketDto savedTicket = mapTicket(ticketRepository.save(ticket));
+
+        // Send notification to ticket creator about status change
+        User creator = userRepository.findByEmailIgnoreCase(ticket.getCreatedByEmail())
+            .orElse(null);
+        if (creator != null) {
+            notificationService.createNotification(
+                creator,
+                "Ticket Status Changed",
+                "Your ticket #" + ticket.getId() + " status has changed from " + previousStatus + " to " + nextStatus,
+                NotificationType.TICKET_STATUS_CHANGED
+            );
+        }
+
+        // Send notification to assigned technician about status change
+        if (ticket.getAssignedToEmail() != null) {
+            User assignee = userRepository.findByEmailIgnoreCase(ticket.getAssignedToEmail())
+                .orElse(null);
+            if (assignee != null) {
+                notificationService.createNotification(
+                    assignee,
+                    "Assigned Ticket Status Changed",
+                    "Ticket #" + ticket.getId() + " has been updated. Status: " + nextStatus,
+                    NotificationType.TICKET_STATUS_CHANGED
+                );
+            }
+        }
+
+        return savedTicket;
     }
 
     public TicketAttachmentDto uploadAttachment(@NonNull Long ticketId, @NonNull MultipartFile file) {
@@ -351,7 +400,37 @@ public class TicketService {
         ticket.setUpdatedAt(LocalDateTime.now());
         ticketRepository.save(ticket);
 
-        return mapComment(ticketCommentRepository.save(comment));
+        TicketCommentDto savedComment = mapComment(ticketCommentRepository.save(comment));
+
+        // Send notification to ticket creator about new comment
+        if (!currentUser.getEmail().equalsIgnoreCase(ticket.getCreatedByEmail())) {
+            User creator = userRepository.findByEmailIgnoreCase(ticket.getCreatedByEmail())
+                .orElse(null);
+            if (creator != null) {
+                notificationService.createNotification(
+                    creator,
+                    "New Comment on Your Ticket",
+                    currentUser.getEmail() + " added a comment to ticket #" + ticket.getId() + ": " + ticket.getTitle(),
+                    NotificationType.TICKET_COMMENT_ADDED
+                );
+            }
+        }
+
+        // Send notification to assigned technician about new comment
+        if (ticket.getAssignedToEmail() != null && !currentUser.getEmail().equalsIgnoreCase(ticket.getAssignedToEmail())) {
+            User assignee = userRepository.findByEmailIgnoreCase(ticket.getAssignedToEmail())
+                .orElse(null);
+            if (assignee != null) {
+                notificationService.createNotification(
+                    assignee,
+                    "New Comment on Assigned Ticket",
+                    currentUser.getEmail() + " added a comment to ticket #" + ticket.getId() + ": " + ticket.getTitle(),
+                    NotificationType.TICKET_COMMENT_ADDED
+                );
+            }
+        }
+
+        return savedComment;
     }
 
     private TicketDetailDto buildDetail(Ticket ticket) {
