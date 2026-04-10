@@ -71,6 +71,16 @@ const BookingRequestModal = ({
       return;
     }
 
+    if (isFacilityBooking && Number(form.attendees) > Number(resource.capacity)) {
+      window.alert(`Expected attendees cannot exceed the facility's capacity of ${resource.capacity}.`);
+      return;
+    }
+
+    if (!isFacilityBooking && Number(form.expectedAmount) > Number(resource.capacity)) {
+      window.alert(`Expected amount cannot exceed the available asset amount of ${resource.capacity}.`);
+      return;
+    }
+
     await onSubmit({
       bookingDate: form.bookingDate,
       timeRange: isFacilityBooking ? `${form.timeFrom} - ${form.timeTo}` : '',
