@@ -9,6 +9,12 @@ const STATUS_BADGE_CLASS = {
   CLOSED: 'bg-gray-200 text-gray-800 border border-gray-300',
 };
 
+// Validate location format: One capital English letter + at least 3 numbers (e.g., A503)
+const validateLocationFormat = (location) => {
+  const locationPattern = /^[A-Z]\d{3,}$/;
+  return locationPattern.test(location.trim());
+};
+
 const UserTicketPanel = () => {
   const [tickets, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -18,10 +24,13 @@ const UserTicketPanel = () => {
   const [deleting, setDeleting] = useState(false);
   const [commenting, setCommenting] = useState(false);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [deletingAttachment, setDeletingAttachment] = useState(null);
   const [form, setForm] = useState({ title: '', description: '', location: '' });
   const [createAttachments, setCreateAttachments] = useState([]);
   const [editForm, setEditForm] = useState({ title: '', description: '', location: '' });
   const [newComment, setNewComment] = useState('');
+  const [formErrors, setFormErrors] = useState({ location: '' });
+  const [editFormErrors, setEditFormErrors] = useState({ location: '' });
 
   const loadTickets = async () => {
     setLoading(true);
@@ -74,6 +83,11 @@ const UserTicketPanel = () => {
       return;
     }
 
+    if (!validateLocationFormat(editForm.location)) {
+      window.alert('Location must be in format: One capital letter + at least 3 numbers (e.g., A503)');
+      return;
+    }
+
     setUpdating(true);
     try {
       await ticketsApi.updateMyTicket(selectedTicket.id, {
@@ -122,6 +136,11 @@ const UserTicketPanel = () => {
 
     if (!form.title.trim() || !form.description.trim() || !form.location.trim()) {
       window.alert('Please fill all ticket fields.');
+      return;
+    }
+
+    if (!validateLocationFormat(form.location)) {
+      window.alert('Location must be in format: One capital letter + at least 3 numbers (e.g., A503)');
       return;
     }
 
@@ -198,6 +217,27 @@ const UserTicketPanel = () => {
     }
   };
 
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (!selectedTicket?.id) {
+      return;
+    }
+
+    if (!window.confirm('Delete this attachment? This cannot be undone.')) {
+      return;
+    }
+
+    setDeletingAttachment(attachmentId);
+    try {
+      await ticketsApi.deleteAttachment(selectedTicket.id, attachmentId);
+      await openTicket(selectedTicket.id);
+    } catch (error) {
+      console.error('Failed to delete attachment', error);
+      window.alert(error?.response?.data?.message || 'Failed to delete attachment');
+    } finally {
+      setDeletingAttachment(null);
+    }
+  };
+
   const formatFileSize = (sizeInBytes) => {
     if (!sizeInBytes) {
       return '0 B';
@@ -226,13 +266,30 @@ const UserTicketPanel = () => {
           onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
           className="rounded-md border border-gray-300 px-3 py-2 text-sm"
         />
-        <input
-          type="text"
-          placeholder="Location (e.g. Lab 2)"
-          value={form.location}
-          onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Location (e.g. A503)"
+            value={form.location}
+            onChange={(e) => {
+              const upperValue = e.target.value.toUpperCase();
+              setForm((prev) => ({ ...prev, location: upperValue }));
+              // Show validation error if not empty and invalid format
+              if (upperValue && !validateLocationFormat(upperValue)) {
+                setFormErrors((prev) => ({ ...prev, location: 'Must be: 1 capital letter + at least 3 numbers (e.g., A503)' }));
+              } else {
+                setFormErrors((prev) => ({ ...prev, location: '' }));
+              }
+            }}
+            className={`w-full rounded-md border px-3 py-2 text-sm ${
+              formErrors.location ? 'border-red-500' : 'border-gray-300'
+            }`}
+            title="Enter hall location: One capital letter + at least 3 numbers (e.g., A503)"
+          />
+          {formErrors.location && (
+            <p className="text-xs text-red-600 mt-1">{formErrors.location}</p>
+          )}
+        </div>
         <button
           type="submit"
           disabled={saving}
@@ -336,12 +393,28 @@ const UserTicketPanel = () => {
                   onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                 />
-                <input
-                  type="text"
-                  value={editForm.location}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, location: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={editForm.location}
+                    onChange={(e) => {
+                      const upperValue = e.target.value.toUpperCase();
+                      setEditForm((prev) => ({ ...prev, location: upperValue }));
+                      // Show validation error if not empty and invalid format
+                      if (upperValue && !validateLocationFormat(upperValue)) {
+                        setEditFormErrors((prev) => ({ ...prev, location: 'Must be: 1 capital letter + at least 3 numbers (e.g., A503)' }));
+                      } else {
+                        setEditFormErrors((prev) => ({ ...prev, location: '' }));
+                      }
+                    }}
+                    className={`w-full rounded-md border px-3 py-2 text-sm ${
+                      editFormErrors.location ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {editFormErrors.location && (
+                    <p className="text-xs text-red-600 mt-1">{editFormErrors.location}</p>
+                  )}
+                </div>
                 <textarea
                   value={editForm.description}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
@@ -383,16 +456,29 @@ const UserTicketPanel = () => {
                 ) : (
                   <div className="space-y-1">
                     {(selectedTicket.attachments || []).map((attachment) => (
-                      <a
+                      <div
                         key={attachment.id}
-                        href={ticketsApi.getAttachmentDownloadUrl(selectedTicket.id, attachment.id)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md px-2 py-1 text-sm text-blue-700 hover:bg-blue-50"
+                        className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md px-2 py-1"
                       >
-                        <span className="truncate pr-2">{attachment.originalFileName}</span>
-                        <span className="text-xs text-gray-500 whitespace-nowrap">{formatFileSize(attachment.fileSizeBytes)}</span>
-                      </a>
+                        <a
+                          href={ticketsApi.getAttachmentDownloadUrl(selectedTicket.id, attachment.id)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex-1 flex items-center gap-2 text-sm text-blue-700 hover:underline"
+                        >
+                          <span className="truncate">{attachment.originalFileName}</span>
+                          <span className="text-xs text-gray-500 whitespace-nowrap">({formatFileSize(attachment.fileSizeBytes)})</span>
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAttachment(attachment.id)}
+                          disabled={deletingAttachment === attachment.id}
+                          className="ml-2 text-red-600 hover:text-red-700 text-sm font-medium disabled:opacity-60"
+                          title="Delete attachment"
+                        >
+                          {deletingAttachment === attachment.id ? 'Deleting…' : '✕'}
+                        </button>
+                      </div>
                     ))}
                   </div>
                 )}

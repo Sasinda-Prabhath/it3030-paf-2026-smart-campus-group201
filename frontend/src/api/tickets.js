@@ -244,6 +244,18 @@ export const ticketsApi = {
     };
   },
 
+  async deleteAttachment(ticketId, attachmentId) {
+    return apiClient.delete(`/api/tickets/my/${ticketId}/attachments/${attachmentId}`);
+  },
+
+  async deleteAssignedAttachment(ticketId, attachmentId) {
+    return apiClient.delete(`/api/tickets/assigned/${ticketId}/attachments/${attachmentId}`);
+  },
+
+  async deleteAdminAttachment(ticketId, attachmentId) {
+    return apiClient.delete(`/api/tickets/admin/${ticketId}/attachments/${attachmentId}`);
+  },
+
   getAttachmentDownloadUrl(ticketId, attachmentId) {
     const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
     return `${baseUrl}/api/tickets/my/${ticketId}/attachments/${attachmentId}`;

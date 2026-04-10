@@ -1,6 +1,6 @@
 import { useAuth } from '../features/auth/AuthContext';
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { bookingRequestsApi } from '../api/bookingRequests';
 import BookingRequestModal from '../components/BookingRequestModal';
 import UserTicketPanel from '../components/UserTicketPanel';
@@ -9,9 +9,18 @@ const FACILITY_TYPES = ['LECTURE_HALL', 'MEETING_ROOM', 'LAB'];
 
 const UserDashboard = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('overview');
   const [myBookings, setMyBookings] = useState([]);
   const [bookingModalState, setBookingModalState] = useState({ isOpen: false, request: null, resource: null });
+
+  // Handle tab from URL query parameter
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'tickets') {
+      setActiveTab('tickets');
+    }
+  }, [searchParams]);
 
   const loadMyBookings = async () => {
     if (!user?.email) {

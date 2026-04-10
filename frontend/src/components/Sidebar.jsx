@@ -17,6 +17,7 @@ const Sidebar = () => {
       { path: '/resources', label: 'Resources', icon: '🏫' },
       { path: '/profile', label: 'Profile', icon: '👤' },
       { path: '/notifications', label: 'Notifications', icon: '🔔' },
+      { path: '/dashboard?tab=tickets', label: 'Support Tickets', icon: '🎫' },
     ] : [
       { path: '/resources', label: 'Resources', icon: '🏫' },
       { path: '/profile', label: 'Profile', icon: '👤' },

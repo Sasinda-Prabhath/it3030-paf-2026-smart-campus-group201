@@ -311,6 +311,51 @@ public class TicketService {
         return buildAttachmentDownload(ticketId, attachmentId);
     }
 
+    @Transactional
+    public void deleteAttachment(@NonNull Long ticketId, @NonNull Long attachmentId) {
+        User currentUser = getCurrentUser();
+        Ticket ticket = getOwnedTicket(ticketId, currentUser);
+
+        deleteAttachmentInternal(ticket, attachmentId);
+    }
+
+    @Transactional
+    public void deleteAttachmentFromAssignedTicket(@NonNull Long ticketId, @NonNull Long attachmentId) {
+        User currentUser = getCurrentUser();
+        Ticket ticket = getAssignedTicketForTechnician(ticketId, currentUser);
+
+        deleteAttachmentInternal(ticket, attachmentId);
+    }
+
+    @Transactional
+    public void deleteAttachmentFromTicketAsAdmin(@NonNull Long ticketId, @NonNull Long attachmentId) {
+        User currentUser = getCurrentUser();
+        ensureAdmin(currentUser);
+        Ticket ticket = getTicketOrThrow(ticketId);
+
+        deleteAttachmentInternal(ticket, attachmentId);
+    }
+
+    private void deleteAttachmentInternal(@NonNull Ticket ticket, @NonNull Long attachmentId) {
+        TicketAttachment attachment = ticketAttachmentRepository.findByIdAndTicketId(attachmentId, ticket.getId())
+            .orElseThrow(() -> new IllegalArgumentException("Attachment not found"));
+
+        // Delete file from storage
+        try {
+            Path filePath = attachmentStoragePath.resolve(attachment.getStoredFileName()).normalize();
+            Files.deleteIfExists(filePath);
+        } catch (IOException exception) {
+            throw new IllegalStateException("Failed to delete attachment file", exception);
+        }
+
+        // Delete attachment record from database
+        ticketAttachmentRepository.delete(attachment);
+
+        // Update ticket's updated time
+        ticket.setUpdatedAt(LocalDateTime.now());
+        ticketRepository.save(ticket);
+    }
+
     public TicketCommentDto addComment(@NonNull Long ticketId, @NonNull AddTicketCommentDto dto) {
         User currentUser = getCurrentUser();
         Ticket ticket = getOwnedTicket(ticketId, currentUser);

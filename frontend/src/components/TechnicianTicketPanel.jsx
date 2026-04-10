@@ -18,6 +18,7 @@ const TechnicianTicketPanel = () => {
   const [resolving, setResolving] = useState(false);
   const [commenting, setCommenting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deletingAttachment, setDeletingAttachment] = useState(null);
   const [statusValue, setStatusValue] = useState('OPEN');
   const [resolutionMessage, setResolutionMessage] = useState('');
   const [comment, setComment] = useState('');
@@ -144,6 +145,28 @@ const TechnicianTicketPanel = () => {
     } finally {
       setUploading(false);
       event.target.value = '';
+    }
+  };
+
+  const onDeleteAttachment = async (attachmentId) => {
+    if (!selectedTicket?.id) {
+      return;
+    }
+
+    if (!window.confirm('Delete this attachment? This cannot be undone.')) {
+      return;
+    }
+
+    setDeletingAttachment(attachmentId);
+    try {
+      await ticketsApi.deleteAssignedAttachment(selectedTicket.id, attachmentId);
+      await openTicket(selectedTicket.id);
+      await loadTickets();
+    } catch (error) {
+      console.error('Failed to delete attachment', error);
+      window.alert(error?.response?.data?.message || 'Failed to delete attachment');
+    } finally {
+      setDeletingAttachment(null);
     }
   };
 
@@ -287,15 +310,28 @@ const TechnicianTicketPanel = () => {
                   <p className="text-sm text-gray-600">No attachments yet.</p>
                 )}
                 {(selectedTicket.attachments || []).map((item) => (
-                  <a
+                  <div
                     key={item.id}
-                    href={ticketsApi.getAssignedAttachmentDownloadUrl(selectedTicket.id, item.id)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block border border-gray-200 rounded px-3 py-2 text-sm hover:bg-gray-50"
+                    className="flex items-center justify-between border border-gray-200 rounded px-3 py-2"
                   >
-                    {item.originalFileName} ({Math.ceil((item.fileSizeBytes || 0) / 1024)} KB)
-                  </a>
+                    <a
+                      href={ticketsApi.getAssignedAttachmentDownloadUrl(selectedTicket.id, item.id)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 text-sm text-blue-700 hover:underline truncate"
+                    >
+                      {item.originalFileName} ({Math.ceil((item.fileSizeBytes || 0) / 1024)} KB)
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteAttachment(item.id)}
+                      disabled={deletingAttachment === item.id}
+                      className="ml-2 text-red-600 hover:text-red-700 text-sm font-medium disabled:opacity-60"
+                      title="Delete attachment"
+                    >
+                      {deletingAttachment === item.id ? 'Deleting…' : '✕'}
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>

@@ -96,6 +96,15 @@ public class TicketController {
             .body(download.getResource());
     }
 
+    @DeleteMapping("/my/{ticketId}/attachments/{attachmentId}")
+    public ResponseEntity<Void> deleteAttachment(
+        @PathVariable @NonNull Long ticketId,
+        @PathVariable @NonNull Long attachmentId
+    ) {
+        ticketService.deleteAttachment(ticketId, attachmentId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/assigned")
     public ResponseEntity<List<TicketDto>> getAssignedTickets() {
         return ResponseEntity.ok(ticketService.getAssignedTickets());
@@ -141,6 +150,15 @@ public class TicketController {
             .contentType(MediaType.parseMediaType(download.getContentType()))
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + download.getFileName() + "\"")
             .body(download.getResource());
+    }
+
+    @DeleteMapping("/assigned/{ticketId}/attachments/{attachmentId}")
+    public ResponseEntity<Void> deleteAttachmentFromAssignedTicket(
+        @PathVariable @NonNull Long ticketId,
+        @PathVariable @NonNull Long attachmentId
+    ) {
+        ticketService.deleteAttachmentFromAssignedTicket(ticketId, attachmentId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/admin")
@@ -202,5 +220,14 @@ public class TicketController {
             .contentType(MediaType.parseMediaType(download.getContentType()))
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + download.getFileName() + "\"")
             .body(download.getResource());
+    }
+
+    @DeleteMapping("/admin/{ticketId}/attachments/{attachmentId}")
+    public ResponseEntity<Void> deleteAttachmentFromTicketAsAdmin(
+        @PathVariable @NonNull Long ticketId,
+        @PathVariable @NonNull Long attachmentId
+    ) {
+        ticketService.deleteAttachmentFromTicketAsAdmin(ticketId, attachmentId);
+        return ResponseEntity.noContent().build();
     }
 }
