@@ -6,6 +6,7 @@ public class UserListDto {
     private String fullName;
     private String role;
     private String userType;
+    private String staffType;
     private String accountStatus;
     private String profileImageUrl;
     private Boolean emailVerified;
@@ -29,6 +30,9 @@ public class UserListDto {
 
     public String getUserType() { return userType; }
     public void setUserType(String userType) { this.userType = userType; }
+
+    public String getStaffType() { return staffType; }
+    public void setStaffType(String staffType) { this.staffType = staffType; }
 
     public String getAccountStatus() { return accountStatus; }
     public void setAccountStatus(String accountStatus) { this.accountStatus = accountStatus; }

@@ -14,9 +14,12 @@ const Sidebar = () => {
     // Dashboard only for USER role (students/lecturers)
     const commonItems = user?.role === 'USER' ? [
       { path: '/dashboard', label: 'Dashboard', icon: '📊' },
+      { path: '/resources', label: 'Resources', icon: '🏫' },
       { path: '/profile', label: 'Profile', icon: '👤' },
       { path: '/notifications', label: 'Notifications', icon: '🔔' },
+      { path: '/dashboard?tab=tickets', label: 'Support Tickets', icon: '🎫' },
     ] : [
+      { path: '/resources', label: 'Resources', icon: '🏫' },
       { path: '/profile', label: 'Profile', icon: '👤' },
       { path: '/notifications', label: 'Notifications', icon: '🔔' },
     ];
@@ -38,6 +41,7 @@ const Sidebar = () => {
     const adminItems = user?.role === 'ADMIN' ? [
       { divider: true },
       { path: '/admin', label: 'Admin Dashboard', icon: '⚙️' },
+      { path: '/admin/bookings', label: 'Booking Requests', icon: '✅' },
       { path: '/admin/users', label: 'User Management', icon: '👥' },
     ] : [];
 

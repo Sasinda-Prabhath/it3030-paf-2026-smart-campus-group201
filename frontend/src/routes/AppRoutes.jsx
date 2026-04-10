@@ -12,10 +12,12 @@ import AdminDashboard from '../pages/AdminDashboard';
 import UserDashboard from '../pages/UserDashboard';
 import TechnicianDashboard from '../pages/TechnicianDashboard';
 import ManagerDashboard from '../pages/ManagerDashboard';
+import ResourceCatalogPage from '../pages/ResourceCatalogPage';
+import AdminBookingRequestsPage from '../pages/AdminBookingRequestsPage';
 
 const AppRoutes = () => {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -45,12 +47,20 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/resources"
+            element={
+              <RoleGuard allowedRoles={['USER', 'MANAGER', 'ADMIN']}>
+                <MainLayout><ResourceCatalogPage /></MainLayout>
+              </RoleGuard>
+            }
+          />
           
           {/* Role-based dashboards */}
           <Route
             path="/dashboard"
             element={
-              <RoleGuard allowedRoles={['USER']}>
+              <RoleGuard allowedRoles={['USER', 'ADMIN']}>
                 <MainLayout><UserDashboard /></MainLayout>
               </RoleGuard>
             }
@@ -86,6 +96,14 @@ const AppRoutes = () => {
             element={
               <RoleGuard allowedRoles={['ADMIN']}>
                 <MainLayout><AdminUsersPage /></MainLayout>
+              </RoleGuard>
+            }
+          />
+          <Route
+            path="/admin/bookings"
+            element={
+              <RoleGuard allowedRoles={['ADMIN']}>
+                <MainLayout><AdminBookingRequestsPage /></MainLayout>
               </RoleGuard>
             }
           />

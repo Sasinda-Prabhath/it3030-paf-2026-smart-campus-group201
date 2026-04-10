@@ -5,7 +5,6 @@ import com.smartcampus.user.dto.UpdateRoleDto;
 import com.smartcampus.user.dto.UpdateClassificationDto;
 import com.smartcampus.user.dto.UpdateStatusDto;
 import com.smartcampus.user.entity.User;
-import com.smartcampus.user.entity.Role;
 import com.smartcampus.user.entity.AccountStatus;
 import com.smartcampus.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +76,7 @@ public class AdminUserService {
         dto.setFullName(user.getFullName());
         dto.setRole(user.getRole().name());
         dto.setUserType(user.getUserType() != null ? user.getUserType().name() : null);
+        dto.setStaffType(user.getStaffType() != null ? user.getStaffType().name() : null);
         dto.setAccountStatus(user.getAccountStatus() != null ? user.getAccountStatus().name() : null);
         dto.setProfileImageUrl(user.getProfileImageUrl());
         dto.setEmailVerified(user.getEmailVerified());
