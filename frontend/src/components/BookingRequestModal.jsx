@@ -93,21 +93,23 @@ const BookingRequestModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-900">{title || `Book ${resource.name}`}</h3>
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="w-full max-w-lg bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/50 transform transition-all">
+        <div className="px-6 py-5 bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="text-xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            {title || `Book ${resource.name}`}
+          </h3>
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors"
           >
-            Close
+            ✕
           </button>
         </div>
 
-        <form onSubmit={submit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="flex flex-col gap-2 text-sm text-slate-700">
+        <form onSubmit={submit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+          <label className="flex flex-col gap-1.5 text-sm font-semibold text-slate-700">
             Booking Date
             <input
               required
@@ -115,38 +117,38 @@ const BookingRequestModal = ({
               min={getTodayDateString()}
               value={form.bookingDate}
               onChange={(event) => setForm((prev) => ({ ...prev, bookingDate: event.target.value }))}
-              className="px-3 py-2 border border-slate-300 rounded-md"
+              className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900"
             />
           </label>
 
           {isFacilityBooking && (
-            <label className="flex flex-col gap-2 text-sm text-slate-700">
+            <label className="flex flex-col gap-1.5 text-sm font-semibold text-slate-700">
               From Time
               <input
                 required
                 type="time"
                 value={form.timeFrom}
                 onChange={(event) => setForm((prev) => ({ ...prev, timeFrom: event.target.value }))}
-                className="px-3 py-2 border border-slate-300 rounded-md"
+                className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900"
               />
             </label>
           )}
 
           {isFacilityBooking && (
-            <label className="flex flex-col gap-2 text-sm text-slate-700">
+            <label className="flex flex-col gap-1.5 text-sm font-semibold text-slate-700">
               To Time
               <input
                 required
                 type="time"
                 value={form.timeTo}
                 onChange={(event) => setForm((prev) => ({ ...prev, timeTo: event.target.value }))}
-                className="px-3 py-2 border border-slate-300 rounded-md"
+                className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900"
               />
             </label>
           )}
 
           {isFacilityBooking && (
-            <label className="flex flex-col gap-2 text-sm text-slate-700">
+            <label className="flex flex-col gap-1.5 text-sm font-semibold text-slate-700">
               Expected Attendees
               <input
                 required
@@ -154,13 +156,13 @@ const BookingRequestModal = ({
                 type="number"
                 value={form.attendees}
                 onChange={(event) => setForm((prev) => ({ ...prev, attendees: event.target.value }))}
-                className="px-3 py-2 border border-slate-300 rounded-md"
+                className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900"
               />
             </label>
           )}
 
           {!isFacilityBooking && (
-            <label className="flex flex-col gap-2 text-sm text-slate-700">
+            <label className="flex flex-col gap-1.5 text-sm font-semibold text-slate-700">
               Expected Amount
               <input
                 required
@@ -168,32 +170,33 @@ const BookingRequestModal = ({
                 type="number"
                 value={form.expectedAmount}
                 onChange={(event) => setForm((prev) => ({ ...prev, expectedAmount: event.target.value }))}
-                className="px-3 py-2 border border-slate-300 rounded-md"
+                className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900"
               />
             </label>
           )}
 
-          <label className="flex flex-col gap-2 text-sm text-slate-700 md:col-span-2">
+          <label className="flex flex-col gap-1.5 text-sm font-semibold text-slate-700 md:col-span-2">
             Purpose
             <textarea
               required
               value={form.purpose}
               onChange={(event) => setForm((prev) => ({ ...prev, purpose: event.target.value }))}
-              className="px-3 py-2 border border-slate-300 rounded-md min-h-[90px]"
+              className="px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900 min-h-[100px] resize-y"
+              placeholder="Briefly describe the purpose of your booking..."
             />
           </label>
 
-          <div className="md:col-span-2 flex justify-end gap-3 pt-2">
+          <div className="md:col-span-2 flex justify-end gap-3 pt-4 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
+              className="px-5 py-2.5 rounded-xl font-bold border border-transparent text-slate-600 hover:bg-slate-100 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
+              className="px-6 py-2.5 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30 hover:shadow-lg hover:-translate-y-0.5 transition-all active:translate-y-0"
             >
               {submitLabel || 'Submit Request'}
             </button>

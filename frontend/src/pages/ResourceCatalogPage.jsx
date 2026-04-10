@@ -130,16 +130,17 @@ const formatDateLabel = (value) => {
 };
 
 const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDelete, onBook }) => (
-  <article className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
-    <div className={`px-3 py-2 text-white ${accentClass}`}>
-      <div className="flex items-start justify-between gap-3">
+  <article className="group relative bg-white/90 backdrop-blur-sm border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+    <div className={`px-4 py-3 text-white ${accentClass} relative overflow-hidden`}>
+      <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="flex items-start justify-between gap-3 relative z-10">
         <div>
-          <h3 className="font-semibold text-base leading-tight">{resource.name}</h3>
-          <p className="text-xs opacity-90">{resource.type.replaceAll('_', ' ')}</p>
+          <h3 className="font-bold text-lg leading-tight drop-shadow-sm">{resource.name}</h3>
+          <p className="text-xs font-medium opacity-90 mt-0.5 tracking-wide">{resource.type.replaceAll('_', ' ')}</p>
         </div>
         <span
-          className={`px-2 py-0.5 text-[11px] rounded-full font-semibold ${
-            ['ACTIVE', 'AVAILABLE'].includes(resource.status) ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'
+          className={`px-2.5 py-1 text-[10px] uppercase tracking-wider rounded-full font-bold shadow-sm ${
+            ['ACTIVE', 'AVAILABLE'].includes(resource.status) ? 'bg-emerald-400 text-emerald-950' : 'bg-rose-400 text-rose-950'
           }`}
         >
           {resource.status}
@@ -147,44 +148,60 @@ const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDel
       </div>
     </div>
 
-    <div className="px-3 py-2.5 text-slate-700 space-y-1 text-sm">
-      <p className="leading-snug">
-        <span className="font-medium text-slate-800">{FACILITY_TYPES.includes(resource.type) ? 'Seating Capacity:' : 'Available Amount:'}</span> {resource.capacity}
-      </p>
-      <p className="leading-snug">
-        <span className="font-medium text-slate-800">Location:</span> {resource.location}
-      </p>
-      {resource.availabilityWindow && (
-        <p className="leading-snug whitespace-nowrap overflow-hidden text-ellipsis text-[13px]">
-          <span className="font-medium text-slate-800">Availability Time:</span> {formatAvailabilityWindow(resource.availabilityWindow)}
+    <div className="px-4 py-4 text-slate-600 space-y-2 text-sm z-10 relative">
+      <div className="flex items-center gap-2">
+        <span className="p-1.5 bg-slate-100 rounded-md text-slate-500">👥</span>
+        <p className="leading-snug">
+          <span className="font-semibold text-slate-800">{FACILITY_TYPES.includes(resource.type) ? 'Capacity:' : 'Amount:'}</span> {resource.capacity}
         </p>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="p-1.5 bg-slate-100 rounded-md text-slate-500">📍</span>
+        <p className="leading-snug">
+          <span className="font-semibold text-slate-800">Location:</span> {resource.location}
+        </p>
+      </div>
+      
+      {resource.availabilityWindow && (
+        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100">
+          <span className="p-1.5 bg-blue-50 rounded-md text-blue-500 text-xs">🕒</span>
+          <p className="leading-snug text-[13px] font-medium text-slate-700">
+            {formatAvailabilityWindow(resource.availabilityWindow)}
+          </p>
+        </div>
       )}
 
       {(resource.availableFromDate || resource.availableToDate) && (
-        <p className="leading-snug whitespace-nowrap overflow-hidden text-ellipsis text-[13px]">
-          <span className="font-medium text-slate-800">Available Dates:</span> From {formatDateLabel(resource.availableFromDate)} To {formatDateLabel(resource.availableToDate)}
-        </p>
+        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100">
+          <span className="p-1.5 bg-emerald-50 rounded-md text-emerald-500 text-xs">📅</span>
+          <p className="leading-snug text-[13px] font-medium text-slate-700">
+             {formatDateLabel(resource.availableFromDate)} - {formatDateLabel(resource.availableToDate)}
+          </p>
+        </div>
       )}
 
       {(resource.unavailableFromDate || resource.unavailableToDate) && (
-        <p className="leading-snug whitespace-nowrap overflow-hidden text-ellipsis text-[13px]">
-          <span className="font-medium text-slate-800">Unavailable Dates:</span> From {formatDateLabel(resource.unavailableFromDate)} To {formatDateLabel(resource.unavailableToDate)}
-        </p>
+        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100">
+          <span className="p-1.5 bg-rose-50 rounded-md text-rose-500 text-xs">⚠️</span>
+          <p className="leading-snug text-[13px] font-medium text-slate-700">
+            {formatDateLabel(resource.unavailableFromDate)} - {formatDateLabel(resource.unavailableToDate)}
+          </p>
+        </div>
       )}
 
       {canManage && (
-        <div className="pt-2 flex items-center gap-2">
+        <div className="pt-4 flex items-center gap-3">
           <button
             type="button"
             onClick={onEdit}
-            className="px-2.5 py-1 text-xs rounded-md bg-blue-600 text-white hover:bg-blue-700"
+            className="flex-1 py-1.5 text-xs font-semibold rounded-lg border border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-colors"
           >
             Edit
           </button>
           <button
             type="button"
             onClick={onDelete}
-            className="px-2.5 py-1 text-xs rounded-md bg-red-600 text-white hover:bg-red-700"
+            className="flex-1 py-1.5 text-xs font-semibold rounded-lg border border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 transition-colors"
           >
             Delete
           </button>
@@ -192,13 +209,13 @@ const ResourceCard = ({ resource, accentClass, canManage, canBook, onEdit, onDel
       )}
 
       {canBook && (
-        <div className="pt-2">
+        <div className="pt-4">
           <button
             type="button"
             onClick={onBook}
-            className="px-2.5 py-1 text-xs rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
+            className="w-full py-2.5 text-sm font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-500 hover:to-indigo-500 shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0"
           >
-            Book Now
+            Request Booking
           </button>
         </div>
       )}
@@ -890,16 +907,17 @@ const ResourceCatalogPage = () => {
           {!isManager && !isStudent && <p className="text-slate-700">View mode: Use admin booking review to approve or reject requests.</p>}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-3 md:p-4 mb-6">
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-4 md:p-6 mb-8 transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100/40 to-purple-100/40 rounded-full blur-3xl -z-10 transform translate-x-1/2 -translate-y-1/2" />
+          <div className="flex flex-wrap items-center gap-3 mb-6 relative z-10">
             <button
               type="button"
               onClick={() => {
                 setActiveTab('FACILITY');
                 setFilters(emptyFilters);
               }}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'FACILITY' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${
+                activeTab === 'FACILITY' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30 transform -translate-y-0.5' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 border border-transparent'
               }`}
             >
               Facility Catalogue
@@ -910,8 +928,8 @@ const ResourceCatalogPage = () => {
                 setActiveTab('ASSET');
                 setFilters(emptyFilters);
               }}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'ASSET' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              className={`px-5 py-2.5 rounded-xl font-semibold transition-all ${
+                activeTab === 'ASSET' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30 transform -translate-y-0.5' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 border border-transparent'
               }`}
             >
               Asset Catalogue
@@ -922,26 +940,29 @@ const ResourceCatalogPage = () => {
                 <button
                   type="button"
                   onClick={openAddModal}
-                  className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                  className="px-5 py-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 font-semibold shadow-md transition-transform hover:-translate-y-0.5 flex items-center gap-2"
                 >
-                  {activeTab === 'FACILITY' ? '+ Add Facility' : '+ Add Asset'}
+                  <span className="text-lg leading-none">+</span> {activeTab === 'FACILITY' ? 'Add Facility' : 'Add Asset'}
                 </button>
               </div>
             )}
           </div>
 
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-            <input
-              placeholder="Search by name or type"
-              value={filters.search}
-              onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
-              className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 relative z-10">
+            <div className="relative">
+              <input
+                placeholder="Search resources..."
+                value={filters.search}
+                onChange={(event) => setFilters((prev) => ({ ...prev, search: event.target.value }))}
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-medium"
+              />
+              <span className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400">🔍</span>
+            </div>
 
             <select
               value={filters.type}
               onChange={(event) => setFilters((prev) => ({ ...prev, type: event.target.value }))}
-              className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-medium appearance-none cursor-pointer"
             >
               <option value="ALL">All Types</option>
               {typeOptions.map((type) => (
@@ -954,7 +975,7 @@ const ResourceCatalogPage = () => {
             <select
               value={filters.location}
               onChange={(event) => setFilters((prev) => ({ ...prev, location: event.target.value }))}
-              className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-medium appearance-none cursor-pointer"
             >
               {locationOptions.map((location) => (
                 <option key={location} value={location}>
@@ -963,19 +984,22 @@ const ResourceCatalogPage = () => {
               ))}
             </select>
 
-            <input
-              type="number"
-              min="1"
-              placeholder="Min Capacity"
-              value={filters.minCapacity}
-              onChange={(event) => setFilters((prev) => ({ ...prev, minCapacity: event.target.value }))}
-              className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="relative">
+              <input
+                type="number"
+                min="1"
+                placeholder="Min Capacity"
+                value={filters.minCapacity}
+                onChange={(event) => setFilters((prev) => ({ ...prev, minCapacity: event.target.value }))}
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-medium"
+              />
+              <span className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400">👥</span>
+            </div>
 
             <select
               value={filters.status}
               onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value }))}
-              className="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-medium appearance-none cursor-pointer"
             >
               <option value="ALL">All Status</option>
               {currentStatusOptions.map((status) => (
@@ -1009,55 +1033,75 @@ const ResourceCatalogPage = () => {
         )}
 
         {isStudent && (
-          <section className="mt-8 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <div className="px-4 py-3 border-b border-slate-200">
-              <h2 className="text-lg font-semibold text-slate-900">My Booking Requests</h2>
-              <p className="text-sm text-slate-600">Track admin decisions for your submitted requests.</p>
+          <section className="mt-12 bg-white/60 backdrop-blur-md rounded-2xl border border-slate-200/50 shadow-lg overflow-hidden">
+            <div className="px-6 py-5 bg-white/40 border-b border-slate-200/50">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <span className="p-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg text-sm">🎫</span>
+                My Booking Requests
+              </h2>
+              <p className="text-sm text-slate-500 mt-1 pl-11">Track admin decisions for your submitted requests.</p>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
               {studentRequests.map((request) => (
-                <article key={request.id} className="border border-slate-200 rounded-lg p-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                    <p className="font-medium text-slate-900">{request.resourceName}</p>
-                    <span className={`px-2 py-0.5 text-xs rounded-full font-semibold ${
-                      request.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                      request.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
+                <article key={request.id} className="relative bg-white border border-slate-200/70 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow group">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-slate-200 rounded-l-xl opacity-50 group-hover:opacity-100 transition-opacity" />
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <p className="font-bold text-slate-900 text-lg">{request.resourceName}</p>
+                    <span className={`px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wide shadow-sm ${
+                      request.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                      request.status === 'REJECTED' ? 'bg-rose-100 text-rose-700 border border-rose-200' :
+                      'bg-amber-100 text-amber-700 border border-amber-200 animate-pulse'
                     }`}>
                       {request.status}
                     </span>
                   </div>
-                  <div className="text-sm text-slate-700 space-y-1">
-                    <p><span className="font-medium">Date:</span> {request.bookingDate}</p>
-                    {request.timeRange && <p><span className="font-medium">Time:</span> {request.timeRange}</p>}
-                    {request.attendees && <p><span className="font-medium">Expected Attendees:</span> {request.attendees}</p>}
-                    {request.expectedAmount && <p><span className="font-medium">Expected Amount:</span> {request.expectedAmount}</p>}
-                    <p><span className="font-medium">Purpose:</span> {request.purpose}</p>
-                    {request.adminReason && <p><span className="font-medium">Admin Reason:</span> {request.adminReason}</p>}
-                    {request.status === 'PENDING' && (
-                      <div className="pt-2 flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => openEditBookingModal(request)}
-                          className="px-3 py-1 text-xs rounded-md bg-blue-600 text-white hover:bg-blue-700"
-                        >
-                          Edit Request
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteBookingRequest(request.id)}
-                          className="px-3 py-1 text-xs rounded-md bg-red-600 text-white hover:bg-red-700"
-                        >
-                          Delete Request
-                        </button>
+                  <div className="grid grid-cols-2 gap-4 text-sm text-slate-600 mb-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <div>
+                      <p className="text-xs text-slate-400 font-semibold uppercase mb-0.5">Date & Time</p>
+                      <p className="font-medium text-slate-700">{request.bookingDate}</p>
+                      {request.timeRange && <p className="text-slate-500">{request.timeRange}</p>}
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 font-semibold uppercase mb-0.5">Details</p>
+                      {request.attendees && <p>👥 {request.attendees} Attendees</p>}
+                      {request.expectedAmount && <p>📦 {request.expectedAmount} Items</p>}
+                    </div>
+                  </div>
+                  <div className="text-sm">
+                    <p className="text-slate-700"><span className="font-semibold">Purpose:</span> {request.purpose}</p>
+                    {request.adminReason && (
+                      <div className="mt-2 p-2 bg-rose-50 border border-rose-100 rounded-lg">
+                        <p className="text-rose-800 text-xs"><span className="font-bold">Admin Note:</span> {request.adminReason}</p>
                       </div>
                     )}
                   </div>
+                  {request.status === 'PENDING' && (
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={() => openEditBookingModal(request)}
+                        className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteBookingRequest(request.id)}
+                        className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 transition-colors"
+                      >
+                        Cancel Request
+                      </button>
+                    </div>
+                  )}
                 </article>
               ))}
 
               {studentRequests.length === 0 && (
-                <p className="text-sm text-slate-500">No booking requests yet.</p>
+                <div className="col-span-1 lg:col-span-2 py-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-300">
+                  <div className="text-4xl mb-2">🎫</div>
+                  <p className="text-slate-600 font-medium">No booking requests yet</p>
+                  <p className="text-slate-400 text-sm mt-1">When you request a resource, it will appear here.</p>
+                </div>
               )}
             </div>
           </section>
