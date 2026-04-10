@@ -113,7 +113,17 @@ public class BookingRequestService {
 
     public void delete(@NonNull Long id) {
         User currentUser = getCurrentUser();
-        BookingRequest request = getOwnedPendingRequest(id, currentUser);
+        BookingRequest request = bookingRequestRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Booking request not found"));
+
+        if (!currentUser.getEmail().equalsIgnoreCase(request.getRequesterEmail())) {
+            throw new AccessDeniedException("You can only delete your own booking requests");
+        }
+
+        if (request.getStatus() == BookingStatus.APPROVED) {
+            throw new IllegalArgumentException("Approved booking requests cannot be deleted. They must be cancelled first.");
+        }
+
         bookingRequestRepository.delete(request);
     }
 
