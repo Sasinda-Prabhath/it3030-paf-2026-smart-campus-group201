@@ -1094,6 +1094,17 @@ const ResourceCatalogPage = () => {
                       </button>
                     </div>
                   )}
+                  {['REJECTED', 'CANCELLED'].includes(request.status) && (
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={() => deleteBookingRequest(request.id)}
+                        className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors"
+                      >
+                        Dismiss Record
+                      </button>
+                    </div>
+                  )}
                 </article>
               ))}
 

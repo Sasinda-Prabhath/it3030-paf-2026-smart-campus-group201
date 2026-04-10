@@ -268,6 +268,17 @@ const UserDashboard = () => {
                             </button>
                           </div>
                         )}
+                        {['REJECTED', 'CANCELLED'].includes(request.status) && (
+                          <div className="pt-2 flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => deleteBookingRequest(request.id)}
+                              className="px-3 py-1 text-xs rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors"
+                            >
+                              Dismiss Record
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
