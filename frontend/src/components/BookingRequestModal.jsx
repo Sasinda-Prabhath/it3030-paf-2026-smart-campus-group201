@@ -37,6 +37,7 @@ const BookingRequestModal = ({
   onSubmit,
 }) => {
   const [form, setForm] = useState(initialBookingForm);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isFacilityBooking = resource ? FACILITY_TYPES.includes(resource.type) : true;
 
   useEffect(() => {
@@ -82,15 +83,19 @@ const BookingRequestModal = ({
       return;
     }
 
-    await onSubmit({
-      bookingDate: form.bookingDate,
-      timeRange: isFacilityBooking ? `${form.timeFrom} - ${form.timeTo}` : '',
-      purpose: form.purpose,
-      attendees: isFacilityBooking ? form.attendees : null,
-      expectedAmount: isFacilityBooking ? null : form.expectedAmount,
-    });
-
-    onClose();
+    setIsSubmitting(true);
+    try {
+      await onSubmit({
+        bookingDate: form.bookingDate,
+        timeRange: isFacilityBooking ? `${form.timeFrom} - ${form.timeTo}` : '',
+        purpose: form.purpose,
+        attendees: isFacilityBooking ? form.attendees : null,
+        expectedAmount: isFacilityBooking ? null : form.expectedAmount,
+      });
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -197,9 +202,20 @@ const BookingRequestModal = ({
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30 hover:shadow-lg hover:-translate-y-0.5 transition-all active:translate-y-0"
+              disabled={isSubmitting}
+              className="px-6 py-2.5 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30 hover:shadow-lg hover:-translate-y-0.5 transition-all active:translate-y-0 disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[140px]"
             >
-              {submitLabel || 'Submit Request'}
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </>
+              ) : (
+                submitLabel || 'Submit Request'
+              )}
             </button>
           </div>
         </form>
