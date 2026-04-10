@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 const FACILITY_TYPES = ['LECTURE_HALL', 'MEETING_ROOM', 'LAB'];
 
@@ -62,22 +63,22 @@ const BookingRequestModal = ({
     event.preventDefault();
 
     if (form.bookingDate < getTodayDateString()) {
-      window.alert('You cannot select a previous date.');
+      toast.error('You cannot select a previous date.');
       return;
     }
 
     if (isFacilityBooking && form.timeFrom >= form.timeTo) {
-      window.alert('End time must be later than start time.');
+      toast.error('End time must be later than start time.');
       return;
     }
 
     if (isFacilityBooking && Number(form.attendees) > Number(resource.capacity)) {
-      window.alert(`Expected attendees cannot exceed the facility's capacity of ${resource.capacity}.`);
+      toast.error(`Expected attendees cannot exceed the facility's capacity of ${resource.capacity}.`);
       return;
     }
 
     if (!isFacilityBooking && Number(form.expectedAmount) > Number(resource.capacity)) {
-      window.alert(`Expected amount cannot exceed the available asset amount of ${resource.capacity}.`);
+      toast.error(`Expected amount cannot exceed the available asset amount of ${resource.capacity}.`);
       return;
     }
 

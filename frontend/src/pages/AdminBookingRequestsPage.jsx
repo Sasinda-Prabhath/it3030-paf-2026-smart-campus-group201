@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../features/auth/AuthContext';
 import { bookingRequestsApi } from '../api/bookingRequests';
+import toast from 'react-hot-toast';
 
 const FACILITY_TYPES = ['LECTURE_HALL', 'MEETING_ROOM', 'LAB'];
 
@@ -35,7 +36,7 @@ const AdminBookingRequestsPage = () => {
   const reviewRequest = async (requestId, nextStatus) => {
     const reason = (reasons[requestId] || '').trim();
     if (!reason) {
-      window.alert('Reason is required for approval or rejection.');
+      toast.error('Reason is required for approval or rejection.');
       return;
     }
 
@@ -44,6 +45,8 @@ const AdminBookingRequestsPage = () => {
       reason,
       reviewedBy: user?.fullName || 'Admin',
     });
+
+    toast.success(`Request ${nextStatus.toLowerCase()} successfully.`);
 
     await loadRequests();
   };

@@ -3,6 +3,7 @@ import { useAuth } from '../features/auth/AuthContext';
 import { resourceCatalogApi } from '../api/resourceCatalog';
 import { bookingRequestsApi } from '../api/bookingRequests';
 import BookingRequestModal from '../components/BookingRequestModal';
+import toast from 'react-hot-toast';
 
 const FACILITY_TYPES = ['LECTURE_HALL', 'MEETING_ROOM', 'LAB'];
 const ASSET_TYPES = ['PROJECTOR', 'CAMERA', 'PRINTER', 'MICROSCOPE', 'NETWORK_DEVICE', 'OTHER'];
@@ -336,24 +337,24 @@ const AddResourceModal = ({
 
     if (isFacility && ['ACTIVE', 'AVAILABLE'].includes(form.status)) {
       if (!form.availableFromDate || !form.availableToDate) {
-        window.alert('Please select Available From Date and Available To Date.');
+        toast.error('Please select Available From Date and Available To Date.');
         return;
       }
 
       if (form.availableToDate < form.availableFromDate) {
-        window.alert('Available To Date cannot be before Available From Date.');
+        toast.error('Available To Date cannot be before Available From Date.');
         return;
       }
     }
 
     if (isFacility && ['OUT_OF_SERVICE', 'OUT_OF_STOCK'].includes(form.status)) {
       if (!form.unavailableFromDate || !form.unavailableToDate) {
-        window.alert('Please select Unavailable From and Unavailable To dates.');
+        toast.error('Please select Unavailable From and Unavailable To dates.');
         return;
       }
 
       if (form.unavailableToDate < form.unavailableFromDate) {
-        window.alert('Unavailable To cannot be before Unavailable From.');
+        toast.error('Unavailable To cannot be before Unavailable From.');
         return;
       }
     }
@@ -812,7 +813,7 @@ const ResourceCatalogPage = () => {
     }
 
     if (['OUT_OF_SERVICE', 'OUT_OF_STOCK'].includes(resource.status)) {
-      window.alert('This resource is currently unavailable for booking.');
+      toast.error('This resource is currently unavailable for booking.');
       return;
     }
 
@@ -855,7 +856,7 @@ const ResourceCatalogPage = () => {
           expectedAmount: bookingFormData.expectedAmount,
         });
         await loadStudentRequests();
-        window.alert('Booking request updated successfully.');
+        toast.success('Booking request updated successfully.');
         return;
       }
 
@@ -874,9 +875,9 @@ const ResourceCatalogPage = () => {
       });
 
       await loadStudentRequests();
-      window.alert('Booking request submitted successfully.');
+      toast.success('Booking request submitted successfully.');
     } catch (err) {
-      window.alert(err.response?.data?.message || 'Failed to process booking request due to a scheduling conflict or server error.');
+      toast.error(err.response?.data?.message || 'Failed to process booking request due to a scheduling conflict or server error.');
     }
   };
 
@@ -891,7 +892,7 @@ const ResourceCatalogPage = () => {
 
     await bookingRequestsApi.delete(requestId);
     await loadStudentRequests();
-    window.alert('Booking request deleted successfully.');
+    toast.success('Booking request deleted successfully.');
   };
 
   return (

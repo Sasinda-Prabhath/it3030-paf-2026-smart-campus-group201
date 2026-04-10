@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { bookingRequestsApi } from '../api/bookingRequests';
 import BookingRequestModal from '../components/BookingRequestModal';
 import UserTicketPanel from '../components/UserTicketPanel';
+import toast from 'react-hot-toast';
 
 const FACILITY_TYPES = ['LECTURE_HALL', 'MEETING_ROOM', 'LAB'];
 
@@ -58,9 +59,9 @@ const UserDashboard = () => {
     try {
       await bookingRequestsApi.update(bookingModalState.request.id, formData);
       await loadMyBookings();
-      window.alert('Booking request updated successfully.');
+      toast.success('Booking request updated successfully.');
     } catch (err) {
-      window.alert(err.response?.data?.message || 'Failed to update booking request due to a scheduling conflict or server error.');
+      toast.error(err.response?.data?.message || 'Failed to update booking request due to a scheduling conflict or server error.');
     }
   };
 
@@ -71,7 +72,7 @@ const UserDashboard = () => {
 
     await bookingRequestsApi.delete(requestId);
     await loadMyBookings();
-    window.alert('Booking request deleted successfully.');
+    toast.success('Booking request deleted successfully.');
   };
 
   const cancelBookingRequest = async (requestId) => {
@@ -82,9 +83,9 @@ const UserDashboard = () => {
     try {
       await bookingRequestsApi.cancel(requestId);
       await loadMyBookings();
-      window.alert('Booking request cancelled successfully.');
+      toast.success('Booking request cancelled successfully.');
     } catch (err) {
-      window.alert('Failed to cancel booking request. ' + (err.response?.data?.message || ''));
+      toast.error('Failed to cancel booking request. ' + (err.response?.data?.message || ''));
     }
   };
 
